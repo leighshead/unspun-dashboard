@@ -3512,16 +3512,45 @@
         function manageAnnotators() {
             // Populate the textarea with current annotators
             const currentList = annotators.map(ann => `${ann.name}, ${ann.email || ''}`).join('\n');
-            document.getElementById('annotatorTextarea').value = currentList;
+            const textarea = document.getElementById('annotatorTextarea');
+            textarea.value = currentList;
 
             // Show the modal
             document.getElementById('annotatorModal').classList.add('active');
+
+            // Focus the textarea after a short delay (to ensure modal is visible)
+            setTimeout(() => {
+                textarea.focus();
+                // Move cursor to end of text
+                textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            }, 150);
         }
 
         // Close annotator modal
         function closeAnnotatorModal() {
             document.getElementById('annotatorModal').classList.remove('active');
         }
+
+        // Initialize annotator modal textarea to ensure Enter key works
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('annotatorTextarea');
+            if (textarea) {
+                // Explicitly allow Enter key to create new lines
+                textarea.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        // Stop propagation to prevent any parent handlers from interfering
+                        e.stopPropagation();
+                        // Allow default behavior (new line in textarea)
+                        return true;
+                    }
+                });
+
+                // Prevent modal from closing when typing in textarea
+                textarea.addEventListener('keypress', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
 
         // Save annotators from modal
         function saveAnnotatorsFromModal() {
@@ -3555,7 +3584,7 @@
             alert(`Successfully updated! You now have ${newAnnotators.length} annotator(s) configured.`);
         }
 
-        // Close modal when clicking outside of it
+        // Close modal when clicking outside of it (but not when clicking inside)
         document.addEventListener('click', function(event) {
             const modal = document.getElementById('annotatorModal');
             if (event.target === modal) {
@@ -4670,11 +4699,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>👥 Manage Annotators</h2>
-                <button class="modal-close" onclick="closeAnnotatorModal()">&times;</button>
+                <button type="button" class="modal-close" onclick="closeAnnotatorModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="help-text">
-                    Enter one annotator per line in the format: <strong>Name, Email</strong>
+                    Enter one annotator per line in the format: <strong>Name, Email</strong><br>
+                    Press <strong>Enter</strong> to create a new line for each annotator.
                 </div>
                 <div class="example-text">
                     Example:<br>
@@ -4682,11 +4712,17 @@
                     Jane Smith, jane@example.com<br>
                     Bob Wilson, bob@example.com
                 </div>
-                <textarea id="annotatorTextarea" placeholder="Enter annotators here, one per line..."></textarea>
+                <textarea
+                    id="annotatorTextarea"
+                    rows="10"
+                    wrap="soft"
+                    spellcheck="false"
+                    autocomplete="off"
+                    placeholder="Enter annotators here, one per line...&#10;Example:&#10;John Doe, john@example.com&#10;Jane Smith, jane@example.com"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" onclick="closeAnnotatorModal()">Cancel</button>
-                <button class="modal-btn modal-btn-primary" onclick="saveAnnotatorsFromModal()">Save Annotators</button>
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeAnnotatorModal()">Cancel</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="saveAnnotatorsFromModal()">Save Annotators</button>
             </div>
         </div>
     </div>
