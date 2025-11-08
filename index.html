@@ -872,41 +872,87 @@
             top: 20px;
         }
 
-        .sentence {
-            display: inline;
-            padding: 2px 0;
+        .sentence-row {
+            display: flex;
+            gap: 15px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            line-height: 2;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
         }
 
-        .sentence:hover {
-            background-color: #f0f0f0;
+        .sentence-row:hover {
+            background-color: #f8f9fa;
+            border-left-color: #6c757d;
         }
 
-        .sentence.selected {
+        .sentence-number {
+            min-width: 35px;
+            font-weight: 700;
+            color: #6c757d;
+            font-size: 0.9em;
+            padding-top: 2px;
+            user-select: none;
+        }
+
+        .sentence-text {
+            flex: 1;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .sentence-row.selected {
             background-color: #fff3cd;
-            border-bottom: 2px solid #ffc107;
+            border-left-color: #ffc107;
         }
 
-        .sentence.annotated {
-            background-color: #ffeaa7;
-            border-bottom: 2px solid #fdcb6e;
+        .sentence-row.selected .sentence-number {
+            color: #d39e00;
         }
 
-        .sentence.annotated-other {
-            background-color: #dfe6e9;
-            border-bottom: 2px solid #74b9ff;
+        .sentence-row.annotated {
+            background-color: #e7f3ff;
+            border-left-color: #007bff;
         }
 
-        .sentence.agreed {
+        .sentence-row.annotated .sentence-number {
+            color: #007bff;
+        }
+
+        .sentence-row.annotated-other {
+            background-color: #e9ecef;
+            border-left-color: #6c757d;
+        }
+
+        .sentence-row.agreed {
             background-color: #d4edda;
-            border-bottom: 2px solid #28a745;
+            border-left-color: #28a745;
         }
 
-        .sentence.disagreed {
+        .sentence-row.agreed .sentence-number {
+            color: #28a745;
+        }
+
+        .sentence-row.disagreed {
             background-color: #f8d7da;
-            border-bottom: 2px solid #dc3545;
+            border-left-color: #dc3545;
+        }
+
+        .sentence-row.disagreed .sentence-number {
+            color: #dc3545;
+        }
+
+        .bias-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+            background: #007bff;
+            color: white;
         }
 
         .bias-form {
@@ -2891,9 +2937,20 @@
                 <div class="annotation-container">
                     <!-- Left Panel: Article Text -->
                     <div class="article-text-panel">
-                        <h3 style="color: #1e3a5f; margin-bottom: 20px;">Article Text</h3>
+                        <h3 style="color: #1e3a5f; margin-bottom: 20px;">Article Text (Click to Annotate)</h3>
                         <div style="background: #fff9e6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                            <strong>Instructions:</strong> Click on any sentence to select it, then use the panel on the right to label the bias and add your comments.
+                            <strong>📝 How to Annotate:</strong>
+                            <ol style="margin: 10px 0 0 20px; line-height: 1.8;">
+                                <li>Click on any numbered sentence to select it</li>
+                                <li>Choose the primary bias type from the dropdown</li>
+                                <li>Add your explanation of why this sentence is biased</li>
+                                <li>Click "Save Annotation" to add it to your list</li>
+                            </ol>
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0d4a0;">
+                                <strong>Color Guide:</strong>
+                                <span style="display: inline-block; width: 12px; height: 12px; background: #e7f3ff; border: 1px solid #007bff; margin-left: 8px;"></span> Annotated
+                                <span style="display: inline-block; width: 12px; height: 12px; background: #fff3cd; border: 1px solid #ffc107; margin-left: 12px;"></span> Selected
+                            </div>
                         </div>
                         <div id="articleTextContent"></div>
                     </div>
@@ -3596,9 +3653,21 @@
             const container = document.getElementById('articleTextContent');
 
             container.innerHTML = sentences.map((sentence, index) => {
-                const isAnnotated = currentAnnotations.some(ann => ann.sentenceIndex === index);
-                const className = isAnnotated ? 'sentence annotated' : 'sentence';
-                return `<span class="${className}" data-sentence-index="${index}" onclick="selectSentence(${index})">${sentence}</span> `;
+                const annotation = currentAnnotations.find(ann => ann.sentenceIndex === index);
+                const isAnnotated = !!annotation;
+                const className = isAnnotated ? 'sentence-row annotated' : 'sentence-row';
+
+                let biasLabel = '';
+                if (annotation) {
+                    biasLabel = `<span class="bias-badge">${formatBiasType(annotation.primaryBias)}</span>`;
+                }
+
+                return `
+                    <div class="${className}" data-sentence-index="${index}" onclick="selectSentence(${index})">
+                        <div class="sentence-number">${index + 1}</div>
+                        <div class="sentence-text">${sentence}${biasLabel}</div>
+                    </div>
+                `;
             }).join('');
         }
 
@@ -3616,13 +3685,19 @@
             const sentences = parseSentences(article.articleText);
 
             // Highlight selected sentence
-            document.querySelectorAll('.sentence').forEach((el, i) => {
+            document.querySelectorAll('.sentence-row').forEach((el, i) => {
                 if (i === index) {
                     el.classList.add('selected');
                 } else {
                     el.classList.remove('selected');
                 }
             });
+
+            // Scroll to selected sentence
+            const selectedRow = document.querySelector(`.sentence-row[data-sentence-index="${index}"]`);
+            if (selectedRow) {
+                selectedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
             // Show bias form
             document.getElementById('selectionPrompt').style.display = 'none';
@@ -3638,7 +3713,7 @@
         // Cancel sentence selection
         function cancelSelection() {
             selectedSentenceIndex = null;
-            document.querySelectorAll('.sentence').forEach(el => {
+            document.querySelectorAll('.sentence-row').forEach(el => {
                 el.classList.remove('selected');
             });
             document.getElementById('selectionPrompt').style.display = 'block';
@@ -3909,18 +3984,38 @@
                 const hasAnn1 = ann1.some(a => a.sentenceIndex === index);
                 const hasAnn2 = ann2.some(a => a.sentenceIndex === index);
 
-                let className = 'sentence';
+                let className = 'sentence-row';
+                let badges = '';
+
                 if (hasAnn1 && hasAnn2) {
                     const bias1 = ann1.find(a => a.sentenceIndex === index);
                     const bias2 = ann2.find(a => a.sentenceIndex === index);
-                    className += bias1.primaryBias === bias2.primaryBias ? ' agreed' : ' disagreed';
+
+                    if (bias1.primaryBias === bias2.primaryBias) {
+                        className += ' agreed';
+                        badges = `<span class="bias-badge" style="background: #28a745;">${formatBiasType(bias1.primaryBias)}</span>`;
+                    } else {
+                        className += ' disagreed';
+                        badges = `
+                            <span class="bias-badge" style="background: #dc3545;">${annotatorNames[0]}: ${formatBiasType(bias1.primaryBias)}</span>
+                            <span class="bias-badge" style="background: #dc3545;">${annotatorNames[1]}: ${formatBiasType(bias2.primaryBias)}</span>
+                        `;
+                    }
                 } else if (hasAnn1 || hasAnn2) {
                     className += ' disagreed';
+                    const annotation = hasAnn1 ? ann1.find(a => a.sentenceIndex === index) : ann2.find(a => a.sentenceIndex === index);
+                    const annotatorName = hasAnn1 ? annotatorNames[0] : annotatorNames[1];
+                    badges = `<span class="bias-badge" style="background: #ffc107; color: #000;">${annotatorName}: ${formatBiasType(annotation.primaryBias)}</span>`;
                 } else {
                     className += ' agreed';
                 }
 
-                return `<span class="${className}">${sentence}</span> `;
+                return `
+                    <div class="${className}">
+                        <div class="sentence-number">${index + 1}</div>
+                        <div class="sentence-text">${sentence}${badges}</div>
+                    </div>
+                `;
             }).join('');
         }
 
