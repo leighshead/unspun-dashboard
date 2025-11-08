@@ -858,6 +858,7 @@
             <button class="tab-btn" onclick="showView('phase1')">Phase 1: Human-First</button>
             <button class="tab-btn" onclick="showView('phase2')">Phase 2: AI-Augmented</button>
             <button class="tab-btn" onclick="showView('production')">Content Production</button>
+            <button class="tab-btn" onclick="showView('articleQueue')">Article Queue</button>
         </div>
 
         <!-- SYSTEM OVERVIEW -->
@@ -2424,6 +2425,123 @@
                 By December, you should complete the full weekly cycle in 5-6 hours total. As you get better at spotting bias patterns and the tools become second nature, annotation time per article drops from 45 minutes to 30 minutes. AI card generation saves 40-45 minutes per card compared to writing from scratch.
             </div>
         </div>
+
+        <!-- ARTICLE QUEUE -->
+        <div id="articleQueue" class="dashboard-view">
+            <div class="section-header">Article Queue Management</div>
+
+            <!-- Article Ingestion Form -->
+            <div class="highlight-box info" style="margin-bottom: 30px;">
+                <div class="highlight-title">Add New Article to Queue</div>
+                <form id="articleIngestionForm" style="margin-top: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Article Title *</label>
+                            <input type="text" id="articleTitle" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Source *</label>
+                            <input type="text" id="articleSource" required placeholder="e.g., New York Times, BBC News" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Article URL *</label>
+                            <input type="url" id="articleUrl" required placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Priority</label>
+                            <select id="articlePriority" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Article Summary / Notes (optional)</label>
+                        <textarea id="articleNotes" rows="3" placeholder="Brief summary or notes about this article..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; font-family: inherit;"></textarea>
+                    </div>
+                    <button type="submit" style="background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); color: white; padding: 12px 30px; border: none; border-radius: 6px; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        ➕ Add to Queue
+                    </button>
+                </form>
+            </div>
+
+            <!-- Queue Statistics -->
+            <div class="metrics-grid" style="margin-bottom: 30px;">
+                <div class="metric-card">
+                    <div class="metric-icon">📰</div>
+                    <div class="metric-value" id="totalArticles">0</div>
+                    <div class="metric-label">Total in Queue</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">⏳</div>
+                    <div class="metric-value" id="pendingArticles">0</div>
+                    <div class="metric-label">Pending Assignment</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">👤</div>
+                    <div class="metric-value" id="assignedArticles">0</div>
+                    <div class="metric-label">Assigned</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">✅</div>
+                    <div class="metric-value" id="completedArticles">0</div>
+                    <div class="metric-label">Completed</div>
+                </div>
+            </div>
+
+            <!-- Filter and Annotator Management -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Filter by Status:</label>
+                    <select id="statusFilter" onchange="filterQueue()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                        <option value="all">All Articles</option>
+                        <option value="pending">Pending</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Search:</label>
+                    <input type="text" id="searchQuery" onkeyup="filterQueue()" placeholder="Search by title, source..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Manage Annotators:</label>
+                    <button onclick="manageAnnotators()" style="width: 100%; padding: 10px; background: #2c5282; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                        👥 Manage Annotators
+                    </button>
+                </div>
+            </div>
+
+            <!-- Queue Table -->
+            <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h3 style="margin-bottom: 20px; color: #1e3a5f;">Article Queue</h3>
+                <div id="queueTableContainer" style="overflow-x: auto;">
+                    <table id="queueTable" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Priority</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Title</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Source</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Date Added</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Assigned To</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody">
+                            <tr>
+                                <td colspan="7" style="padding: 40px; text-align: center; color: #6c757d;">
+                                    No articles in queue. Add an article above to get started.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2446,6 +2564,235 @@
 
         function toggleExpand(element) {
             element.classList.toggle('expanded');
+        }
+
+        // Article Queue Management
+        let articleQueue = [];
+        let annotators = [];
+
+        // Load data from localStorage on page load
+        function loadQueueData() {
+            const savedQueue = localStorage.getItem('articleQueue');
+            const savedAnnotators = localStorage.getItem('annotators');
+
+            if (savedQueue) {
+                articleQueue = JSON.parse(savedQueue);
+            }
+            if (savedAnnotators) {
+                annotators = JSON.parse(savedAnnotators);
+            } else {
+                // Default annotators
+                annotators = ['Annotator 1', 'Annotator 2', 'Annotator 3'];
+                saveAnnotators();
+            }
+
+            renderQueue();
+            updateStatistics();
+        }
+
+        // Save queue to localStorage
+        function saveQueue() {
+            localStorage.setItem('articleQueue', JSON.stringify(articleQueue));
+            updateStatistics();
+        }
+
+        // Save annotators to localStorage
+        function saveAnnotators() {
+            localStorage.setItem('annotators', JSON.stringify(annotators));
+        }
+
+        // Handle article ingestion form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('articleIngestionForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const article = {
+                        id: Date.now().toString(),
+                        title: document.getElementById('articleTitle').value,
+                        source: document.getElementById('articleSource').value,
+                        url: document.getElementById('articleUrl').value,
+                        priority: document.getElementById('articlePriority').value,
+                        notes: document.getElementById('articleNotes').value,
+                        dateAdded: new Date().toISOString(),
+                        status: 'pending',
+                        assignedTo: null
+                    };
+
+                    articleQueue.push(article);
+                    saveQueue();
+                    renderQueue();
+
+                    // Reset form
+                    form.reset();
+
+                    // Show success message
+                    alert('Article added to queue successfully!');
+                });
+            }
+
+            // Load existing data
+            loadQueueData();
+        });
+
+        // Render the queue table
+        function renderQueue() {
+            const tbody = document.getElementById('queueTableBody');
+            if (!tbody) return;
+
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            const searchQuery = document.getElementById('searchQuery')?.value.toLowerCase() || '';
+
+            // Filter articles
+            let filteredArticles = articleQueue.filter(article => {
+                const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
+                const matchesSearch = article.title.toLowerCase().includes(searchQuery) ||
+                                     article.source.toLowerCase().includes(searchQuery);
+                return matchesStatus && matchesSearch;
+            });
+
+            // Sort by priority (high > medium > low) and then by date
+            const priorityOrder = { high: 1, medium: 2, low: 3 };
+            filteredArticles.sort((a, b) => {
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return new Date(b.dateAdded) - new Date(a.dateAdded);
+            });
+
+            if (filteredArticles.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: #6c757d;">
+                            ${searchQuery || statusFilter !== 'all' ? 'No articles match the current filters.' : 'No articles in queue. Add an article above to get started.'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredArticles.map(article => {
+                const priorityColor = {
+                    high: '#dc3545',
+                    medium: '#ffc107',
+                    low: '#28a745'
+                };
+
+                const statusBadge = {
+                    pending: '<span style="background: #ffc107; color: #000; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">Pending</span>',
+                    assigned: '<span style="background: #007bff; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">Assigned</span>',
+                    completed: '<span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">Completed</span>'
+                };
+
+                return `
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px;">
+                            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${priorityColor[article.priority]};"></span>
+                            <span style="margin-left: 8px; font-weight: 600; text-transform: capitalize;">${article.priority}</span>
+                        </td>
+                        <td style="padding: 12px;">
+                            <a href="${article.url}" target="_blank" style="color: #2c5282; text-decoration: none; font-weight: 500;">${article.title}</a>
+                            ${article.notes ? `<br><small style="color: #6c757d;">${article.notes}</small>` : ''}
+                        </td>
+                        <td style="padding: 12px;">${article.source}</td>
+                        <td style="padding: 12px;">${new Date(article.dateAdded).toLocaleDateString()}</td>
+                        <td style="padding: 12px;">${statusBadge[article.status]}</td>
+                        <td style="padding: 12px;">
+                            ${article.status !== 'pending' ?
+                                `<span style="font-weight: 500;">${article.assignedTo || 'N/A'}</span>` :
+                                `<select onchange="assignArticle('${article.id}', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="">Assign to...</option>
+                                    ${annotators.map(ann => `<option value="${ann}">${ann}</option>`).join('')}
+                                </select>`
+                            }
+                        </td>
+                        <td style="padding: 12px;">
+                            <div style="display: flex; gap: 8px;">
+                                ${article.status === 'assigned' ?
+                                    `<button onclick="markComplete('${article.id}')" style="padding: 6px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">✓ Complete</button>` :
+                                    ''
+                                }
+                                ${article.status !== 'completed' ?
+                                    `<button onclick="removeArticle('${article.id}')" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Remove</button>` :
+                                    `<button onclick="removeArticle('${article.id}')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Archive</button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Assign article to annotator
+        function assignArticle(articleId, annotator) {
+            if (!annotator) return;
+
+            const article = articleQueue.find(a => a.id === articleId);
+            if (article) {
+                article.status = 'assigned';
+                article.assignedTo = annotator;
+                saveQueue();
+                renderQueue();
+            }
+        }
+
+        // Mark article as complete
+        function markComplete(articleId) {
+            const article = articleQueue.find(a => a.id === articleId);
+            if (article) {
+                article.status = 'completed';
+                saveQueue();
+                renderQueue();
+            }
+        }
+
+        // Remove article from queue
+        function removeArticle(articleId) {
+            if (confirm('Are you sure you want to remove this article from the queue?')) {
+                articleQueue = articleQueue.filter(a => a.id !== articleId);
+                saveQueue();
+                renderQueue();
+            }
+        }
+
+        // Filter queue
+        function filterQueue() {
+            renderQueue();
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const total = articleQueue.length;
+            const pending = articleQueue.filter(a => a.status === 'pending').length;
+            const assigned = articleQueue.filter(a => a.status === 'assigned').length;
+            const completed = articleQueue.filter(a => a.status === 'completed').length;
+
+            const totalEl = document.getElementById('totalArticles');
+            const pendingEl = document.getElementById('pendingArticles');
+            const assignedEl = document.getElementById('assignedArticles');
+            const completedEl = document.getElementById('completedArticles');
+
+            if (totalEl) totalEl.textContent = total;
+            if (pendingEl) pendingEl.textContent = pending;
+            if (assignedEl) assignedEl.textContent = assigned;
+            if (completedEl) completedEl.textContent = completed;
+        }
+
+        // Manage annotators
+        function manageAnnotators() {
+            const currentList = annotators.join('\n');
+            const newList = prompt('Enter annotator names (one per line):\n\nCurrent annotators:', currentList);
+
+            if (newList !== null) {
+                annotators = newList.split('\n').map(name => name.trim()).filter(name => name.length > 0);
+                if (annotators.length === 0) {
+                    annotators = ['Annotator 1'];
+                }
+                saveAnnotators();
+                renderQueue();
+                alert('Annotators updated successfully!');
+            }
         }
 
         // Animate metrics on load
