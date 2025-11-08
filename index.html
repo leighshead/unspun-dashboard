@@ -2671,9 +2671,93 @@
         <div id="articleQueue" class="dashboard-view">
             <div class="section-header">Article Queue Management</div>
 
-            <!-- Article Ingestion Form -->
+            <!-- Auto-Ingestion Section -->
+            <div class="highlight-box success" style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div class="highlight-title">🤖 Auto-Ingest Articles (RSS / NewsAPI)</div>
+                    <button onclick="toggleAutoIngest()" id="toggleAutoIngestBtn" style="padding: 8px 16px; background: #2c5282; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                        Show Configuration
+                    </button>
+                </div>
+
+                <div id="autoIngestPanel" style="display: none; margin-top: 20px;">
+                    <!-- NewsAPI Section -->
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #1e3a5f; margin-bottom: 15px;">📡 NewsAPI Configuration</h4>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">NewsAPI Key</label>
+                            <input type="text" id="newsApiKey" placeholder="Enter your NewsAPI key from newsapi.org" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <small style="color: #6c757d;">Get your free API key at <a href="https://newsapi.org/register" target="_blank">newsapi.org</a> (100 requests/day free)</small>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Keywords</label>
+                                <input type="text" id="newsApiKeywords" placeholder="e.g., politics, climate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Language</label>
+                                <select id="newsApiLanguage" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Max Articles</label>
+                                <input type="number" id="newsApiMaxArticles" value="10" min="1" max="100" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                            </div>
+                        </div>
+                        <button onclick="fetchNewsAPI()" class="btn-primary" style="margin-right: 10px;">
+                            🔄 Fetch from NewsAPI
+                        </button>
+                        <button onclick="saveNewsAPIConfig()" class="btn-secondary">
+                            💾 Save Config
+                        </button>
+                    </div>
+
+                    <!-- RSS Feed Section -->
+                    <div style="background: white; padding: 20px; border-radius: 8px;">
+                        <h4 style="color: #1e3a5f; margin-bottom: 15px;">📰 RSS Feed Configuration</h4>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">RSS Feed URLs (one per line)</label>
+                            <textarea id="rssFeedUrls" rows="4" placeholder="https://feeds.example.com/news&#10;https://rss.example.org/articles" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 0.95em;"></textarea>
+                            <small style="color: #6c757d;">Popular feeds: NYT, BBC, Reuters, AP News, etc.</small>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600;">Filter Keywords (optional, comma-separated)</label>
+                            <input type="text" id="rssFilterKeywords" placeholder="e.g., politics, immigration, climate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <button onclick="fetchRSSFeeds()" class="btn-primary" style="margin-right: 10px;">
+                            🔄 Fetch from RSS
+                        </button>
+                        <button onclick="saveRSSConfig()" class="btn-secondary">
+                            💾 Save Config
+                        </button>
+                    </div>
+
+                    <!-- Popular Feeds Presets -->
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Quick Add Popular Feeds:</strong>
+                        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="addPresetFeed('nyt')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">NYT</button>
+                            <button onclick="addPresetFeed('bbc')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">BBC</button>
+                            <button onclick="addPresetFeed('reuters')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Reuters</button>
+                            <button onclick="addPresetFeed('ap')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">AP News</button>
+                            <button onclick="addPresetFeed('guardian')" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">The Guardian</button>
+                        </div>
+                    </div>
+
+                    <!-- Last Fetch Status -->
+                    <div id="fetchStatus" style="margin-top: 15px; padding: 10px; background: #e8f4fd; border-radius: 6px; display: none;">
+                        <strong>Status:</strong> <span id="fetchStatusText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Article Ingestion Form -->
             <div class="highlight-box info" style="margin-bottom: 30px;">
-                <div class="highlight-title">Add New Article to Queue</div>
+                <div class="highlight-title">✍️ Manually Add Article to Queue</div>
                 <form id="articleIngestionForm" style="margin-top: 20px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                         <div>
@@ -3191,6 +3275,266 @@
                 renderQueue();
                 alert('Annotators updated successfully!');
             }
+        }
+
+        // ============ AUTO-INGESTION SYSTEM ============
+
+        // Toggle auto-ingest panel
+        function toggleAutoIngest() {
+            const panel = document.getElementById('autoIngestPanel');
+            const btn = document.getElementById('toggleAutoIngestBtn');
+
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.textContent = 'Hide Configuration';
+                loadAutoIngestConfig();
+            } else {
+                panel.style.display = 'none';
+                btn.textContent = 'Show Configuration';
+            }
+        }
+
+        // Load saved configurations
+        function loadAutoIngestConfig() {
+            const newsApiConfig = JSON.parse(localStorage.getItem('newsApiConfig') || '{}');
+            const rssConfig = JSON.parse(localStorage.getItem('rssConfig') || '{}');
+
+            if (newsApiConfig.apiKey) document.getElementById('newsApiKey').value = newsApiConfig.apiKey;
+            if (newsApiConfig.keywords) document.getElementById('newsApiKeywords').value = newsApiConfig.keywords;
+            if (newsApiConfig.language) document.getElementById('newsApiLanguage').value = newsApiConfig.language;
+            if (newsApiConfig.maxArticles) document.getElementById('newsApiMaxArticles').value = newsApiConfig.maxArticles;
+
+            if (rssConfig.feedUrls) document.getElementById('rssFeedUrls').value = rssConfig.feedUrls;
+            if (rssConfig.keywords) document.getElementById('rssFilterKeywords').value = rssConfig.keywords;
+        }
+
+        // Save NewsAPI configuration
+        function saveNewsAPIConfig() {
+            const config = {
+                apiKey: document.getElementById('newsApiKey').value,
+                keywords: document.getElementById('newsApiKeywords').value,
+                language: document.getElementById('newsApiLanguage').value,
+                maxArticles: document.getElementById('newsApiMaxArticles').value
+            };
+            localStorage.setItem('newsApiConfig', JSON.stringify(config));
+            showFetchStatus('NewsAPI configuration saved!', 'success');
+        }
+
+        // Save RSS configuration
+        function saveRSSConfig() {
+            const config = {
+                feedUrls: document.getElementById('rssFeedUrls').value,
+                keywords: document.getElementById('rssFilterKeywords').value
+            };
+            localStorage.setItem('rssConfig', JSON.stringify(config));
+            showFetchStatus('RSS configuration saved!', 'success');
+        }
+
+        // Fetch articles from NewsAPI
+        async function fetchNewsAPI() {
+            const apiKey = document.getElementById('newsApiKey').value.trim();
+            const keywords = document.getElementById('newsApiKeywords').value.trim();
+            const language = document.getElementById('newsApiLanguage').value;
+            const maxArticles = parseInt(document.getElementById('newsApiMaxArticles').value);
+
+            if (!apiKey) {
+                alert('Please enter your NewsAPI key first. Get one free at newsapi.org');
+                return;
+            }
+
+            showFetchStatus('Fetching articles from NewsAPI...', 'loading');
+
+            try {
+                // Build query
+                const query = keywords || 'news';
+                const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=${language}&pageSize=${maxArticles}&sortBy=publishedAt&apiKey=${apiKey}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 'error') {
+                    throw new Error(data.message || 'NewsAPI error');
+                }
+
+                if (!data.articles || data.articles.length === 0) {
+                    showFetchStatus('No articles found. Try different keywords.', 'warning');
+                    return;
+                }
+
+                // Add articles to queue
+                let addedCount = 0;
+                data.articles.forEach(article => {
+                    // Skip if already in queue
+                    if (articleQueue.some(a => a.url === article.url)) {
+                        return;
+                    }
+
+                    const newArticle = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        title: article.title || 'Untitled',
+                        source: article.source?.name || 'Unknown Source',
+                        url: article.url,
+                        priority: 'medium',
+                        notes: article.description || '',
+                        dateAdded: new Date().toISOString(),
+                        status: 'pending',
+                        assignedTo: null,
+                        articleText: article.content || article.description || ''
+                    };
+
+                    articleQueue.push(newArticle);
+                    addedCount++;
+                });
+
+                saveQueue();
+                renderQueue();
+                showFetchStatus(`Successfully added ${addedCount} article(s) from NewsAPI!`, 'success');
+
+            } catch (error) {
+                showFetchStatus(`Error: ${error.message}`, 'error');
+                console.error('NewsAPI error:', error);
+            }
+        }
+
+        // Fetch articles from RSS feeds
+        async function fetchRSSFeeds() {
+            const feedUrlsText = document.getElementById('rssFeedUrls').value.trim();
+            const keywords = document.getElementById('rssFilterKeywords').value.trim().toLowerCase();
+
+            if (!feedUrlsText) {
+                alert('Please enter at least one RSS feed URL');
+                return;
+            }
+
+            const feedUrls = feedUrlsText.split('\n').map(url => url.trim()).filter(url => url.length > 0);
+            showFetchStatus(`Fetching from ${feedUrls.length} RSS feed(s)...`, 'loading');
+
+            let totalAdded = 0;
+
+            for (const feedUrl of feedUrls) {
+                try {
+                    // Use RSS2JSON service to parse RSS feeds (handles CORS)
+                    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}&api_key=YOUR_RSS2JSON_KEY&count=20`;
+
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+
+                    if (data.status !== 'ok') {
+                        console.error(`Error fetching ${feedUrl}:`, data.message);
+                        continue;
+                    }
+
+                    data.items.forEach(item => {
+                        // Filter by keywords if specified
+                        if (keywords) {
+                            const keywordArray = keywords.split(',').map(k => k.trim());
+                            const titleLower = (item.title || '').toLowerCase();
+                            const descLower = (item.description || '').toLowerCase();
+
+                            const hasKeyword = keywordArray.some(kw =>
+                                titleLower.includes(kw) || descLower.includes(kw)
+                            );
+
+                            if (!hasKeyword) return;
+                        }
+
+                        // Skip if already in queue
+                        if (articleQueue.some(a => a.url === item.link)) {
+                            return;
+                        }
+
+                        const newArticle = {
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                            title: item.title || 'Untitled',
+                            source: data.feed?.title || 'RSS Feed',
+                            url: item.link,
+                            priority: 'medium',
+                            notes: item.description ? stripHtmlTags(item.description).substring(0, 200) : '',
+                            dateAdded: new Date().toISOString(),
+                            status: 'pending',
+                            assignedTo: null,
+                            articleText: item.content ? stripHtmlTags(item.content) : ''
+                        };
+
+                        articleQueue.push(newArticle);
+                        totalAdded++;
+                    });
+
+                } catch (error) {
+                    console.error(`Error fetching ${feedUrl}:`, error);
+                }
+            }
+
+            saveQueue();
+            renderQueue();
+
+            if (totalAdded > 0) {
+                showFetchStatus(`Successfully added ${totalAdded} article(s) from RSS feeds!`, 'success');
+            } else {
+                showFetchStatus('No new articles found from RSS feeds. Try different feeds or keywords.', 'warning');
+            }
+        }
+
+        // Strip HTML tags from text
+        function stripHtmlTags(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        // Add preset feed URLs
+        function addPresetFeed(preset) {
+            const presetFeeds = {
+                'nyt': 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+                'bbc': 'http://feeds.bbci.co.uk/news/rss.xml',
+                'reuters': 'https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best',
+                'ap': 'https://feeds.apnews.com/rss/hub/-/news',
+                'guardian': 'https://www.theguardian.com/world/rss'
+            };
+
+            const feedUrl = presetFeeds[preset];
+            if (feedUrl) {
+                const textarea = document.getElementById('rssFeedUrls');
+                const currentFeeds = textarea.value.trim();
+
+                // Check if already added
+                if (currentFeeds.includes(feedUrl)) {
+                    showFetchStatus(`${preset.toUpperCase()} feed already added`, 'warning');
+                    return;
+                }
+
+                textarea.value = currentFeeds ? currentFeeds + '\n' + feedUrl : feedUrl;
+                showFetchStatus(`${preset.toUpperCase()} feed added`, 'success');
+            }
+        }
+
+        // Show fetch status message
+        function showFetchStatus(message, type) {
+            const statusDiv = document.getElementById('fetchStatus');
+            const statusText = document.getElementById('fetchStatusText');
+
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
+
+            // Color based on type
+            if (type === 'success') {
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+            } else if (type === 'error') {
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+            } else if (type === 'warning') {
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.style.color = '#856404';
+            } else {
+                statusDiv.style.background = '#e8f4fd';
+                statusDiv.style.color = '#004085';
+            }
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
         }
 
         // ============ ANNOTATION SYSTEM ============
