@@ -1130,6 +1130,131 @@
             font-size: 0.95em;
             cursor: pointer;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #1e3a5f;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .modal-body textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .modal-btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .modal-btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .help-text {
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .example-text {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -3385,53 +3510,58 @@
 
         // Manage annotators
         function manageAnnotators() {
-            let dialogContent = '<div style="font-family: Arial, sans-serif;">';
-            dialogContent += '<h3 style="margin-top: 0;">Manage Annotators</h3>';
-            dialogContent += '<p>Current annotators:</p>';
-            dialogContent += '<ul style="list-style: none; padding: 0;">';
-
-            annotators.forEach((ann, i) => {
-                dialogContent += `<li style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">`;
-                dialogContent += `<strong>${i + 1}. ${ann.name}</strong>`;
-                if (ann.email) {
-                    dialogContent += ` - ${ann.email}`;
-                }
-                dialogContent += `</li>`;
-            });
-
-            dialogContent += '</ul>';
-            dialogContent += '<p style="margin-top: 20px;">Enter annotators as: Name, Email (one per line)</p>';
-            dialogContent += '<p style="font-size: 0.9em; color: #666;">Example: John Doe, john@example.com</p>';
-            dialogContent += '</div>';
-
-            // Show current list in a readable format
+            // Populate the textarea with current annotators
             const currentList = annotators.map(ann => `${ann.name}, ${ann.email || ''}`).join('\n');
+            document.getElementById('annotatorTextarea').value = currentList;
 
-            // Create a custom prompt
-            const newList = prompt(dialogContent.replace(/<[^>]*>/g, '') + '\n\nCurrent annotators:\n' + currentList);
-
-            if (newList !== null && newList.trim() !== '') {
-                const newAnnotators = newList.split('\n')
-                    .map(line => {
-                        const parts = line.split(',').map(p => p.trim());
-                        return {
-                            name: parts[0] || '',
-                            email: parts[1] || ''
-                        };
-                    })
-                    .filter(ann => ann.name.length > 0);
-
-                if (newAnnotators.length === 0) {
-                    alert('At least one annotator is required!');
-                    return;
-                }
-
-                annotators = newAnnotators;
-                saveAnnotators();
-                renderQueue();
-                alert('Annotators updated successfully!');
-            }
+            // Show the modal
+            document.getElementById('annotatorModal').classList.add('active');
         }
+
+        // Close annotator modal
+        function closeAnnotatorModal() {
+            document.getElementById('annotatorModal').classList.remove('active');
+        }
+
+        // Save annotators from modal
+        function saveAnnotatorsFromModal() {
+            const textarea = document.getElementById('annotatorTextarea');
+            const newList = textarea.value.trim();
+
+            if (newList === '') {
+                alert('Please enter at least one annotator!');
+                return;
+            }
+
+            const newAnnotators = newList.split('\n')
+                .map(line => {
+                    const parts = line.split(',').map(p => p.trim());
+                    return {
+                        name: parts[0] || '',
+                        email: parts[1] || ''
+                    };
+                })
+                .filter(ann => ann.name.length > 0);
+
+            if (newAnnotators.length === 0) {
+                alert('At least one annotator is required!');
+                return;
+            }
+
+            annotators = newAnnotators;
+            saveAnnotators();
+            renderQueue();
+            closeAnnotatorModal();
+            alert(`Successfully updated! You now have ${newAnnotators.length} annotator(s) configured.`);
+        }
+
+        // Close modal when clicking outside of it
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('annotatorModal');
+            if (event.target === modal) {
+                closeAnnotatorModal();
+            }
+        });
 
         // ============ AUTO-INGESTION SYSTEM ============
 
@@ -3488,10 +3618,38 @@
 
         // Fetch articles from NewsAPI
         async function fetchNewsAPI() {
-            const apiKey = document.getElementById('newsApiKey').value.trim();
-            const keywords = document.getElementById('newsApiKeywords').value.trim();
-            const language = document.getElementById('newsApiLanguage').value;
-            const maxArticles = parseInt(document.getElementById('newsApiMaxArticles').value);
+            console.log('fetchNewsAPI called');
+
+            const apiKeyInput = document.getElementById('newsApiKey');
+            const keywordsInput = document.getElementById('newsApiKeywords');
+            const languageInput = document.getElementById('newsApiLanguage');
+            const maxArticlesInput = document.getElementById('newsApiMaxArticles');
+
+            // Debug: Check if elements exist
+            console.log('Elements found:', {
+                apiKeyInput: !!apiKeyInput,
+                keywordsInput: !!keywordsInput,
+                languageInput: !!languageInput,
+                maxArticlesInput: !!maxArticlesInput
+            });
+
+            if (!apiKeyInput || !keywordsInput || !languageInput || !maxArticlesInput) {
+                alert('Error: Could not find NewsAPI configuration fields. Please refresh the page.');
+                console.error('Missing elements');
+                return;
+            }
+
+            const apiKey = apiKeyInput.value.trim();
+            const keywords = keywordsInput.value.trim();
+            const language = languageInput.value;
+            const maxArticles = parseInt(maxArticlesInput.value);
+
+            console.log('NewsAPI Config:', {
+                apiKey: apiKey ? `${apiKey.substring(0, 10)}...` : 'EMPTY',
+                keywords,
+                language,
+                maxArticles
+            });
 
             if (!apiKey) {
                 alert('Please enter your NewsAPI key first. Get one free at newsapi.org');
@@ -3505,8 +3663,13 @@
                 const query = keywords || 'news';
                 const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=${language}&pageSize=${maxArticles}&sortBy=publishedAt&apiKey=${apiKey}`;
 
+                console.log('Fetching from NewsAPI:', url.replace(apiKey, 'API_KEY_HIDDEN'));
+
                 const response = await fetch(url);
+                console.log('Response status:', response.status, response.statusText);
+
                 const data = await response.json();
+                console.log('NewsAPI Response:', data);
 
                 if (data.status === 'error') {
                     throw new Error(data.message || 'NewsAPI error');
@@ -3514,14 +3677,20 @@
 
                 if (!data.articles || data.articles.length === 0) {
                     showFetchStatus('No articles found. Try different keywords.', 'warning');
+                    console.warn('No articles returned from NewsAPI');
                     return;
                 }
 
+                console.log(`Found ${data.articles.length} articles`);
+
                 // Add articles to queue
                 let addedCount = 0;
+                let skippedCount = 0;
+
                 data.articles.forEach(article => {
                     // Skip if already in queue
                     if (articleQueue.some(a => a.url === article.url)) {
+                        skippedCount++;
                         return;
                     }
 
@@ -3542,13 +3711,22 @@
                     addedCount++;
                 });
 
+                console.log(`Added ${addedCount} articles, skipped ${skippedCount} duplicates`);
+
                 saveQueue();
                 renderQueue();
-                showFetchStatus(`Successfully added ${addedCount} article(s) from NewsAPI!`, 'success');
+
+                let statusMessage = `Successfully added ${addedCount} article(s) from NewsAPI!`;
+                if (skippedCount > 0) {
+                    statusMessage += ` (${skippedCount} duplicates skipped)`;
+                }
+                showFetchStatus(statusMessage, 'success');
 
             } catch (error) {
-                showFetchStatus(`Error: ${error.message}`, 'error');
+                const errorMsg = `Error: ${error.message}`;
+                showFetchStatus(errorMsg, 'error');
                 console.error('NewsAPI error:', error);
+                alert(`NewsAPI Error: ${error.message}\n\nPlease check:\n1. Your API key is valid\n2. You haven't exceeded your rate limit\n3. Your keywords are appropriate`);
             }
         }
 
@@ -4486,5 +4664,32 @@
             });
         });
     </script>
+
+    <!-- Annotator Management Modal -->
+    <div id="annotatorModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👥 Manage Annotators</h2>
+                <button class="modal-close" onclick="closeAnnotatorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-text">
+                    Enter one annotator per line in the format: <strong>Name, Email</strong>
+                </div>
+                <div class="example-text">
+                    Example:<br>
+                    John Doe, john@example.com<br>
+                    Jane Smith, jane@example.com<br>
+                    Bob Wilson, bob@example.com
+                </div>
+                <textarea id="annotatorTextarea" placeholder="Enter annotators here, one per line..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeAnnotatorModal()">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="saveAnnotatorsFromModal()">Save Annotators</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
