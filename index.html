@@ -3125,9 +3125,21 @@
             }
             if (savedAnnotators) {
                 annotators = JSON.parse(savedAnnotators);
+                // Migrate old format (string array) to new format (object array)
+                if (annotators.length > 0 && typeof annotators[0] === 'string') {
+                    annotators = annotators.map(name => ({
+                        name: name,
+                        email: ''
+                    }));
+                    saveAnnotators();
+                }
             } else {
                 // Default annotators
-                annotators = ['Annotator 1', 'Annotator 2', 'Annotator 3'];
+                annotators = [
+                    { name: 'Annotator 1', email: '' },
+                    { name: 'Annotator 2', email: '' },
+                    { name: 'Annotator 3', email: '' }
+                ];
                 saveAnnotators();
             }
 
@@ -3179,6 +3191,7 @@
 
             // Load existing data
             loadQueueData();
+            loadAutoIngestConfig();
         });
 
         // Render the queue table
@@ -3247,7 +3260,10 @@
                             ${article.status === 'pending' ?
                                 `<button onclick="openAssignDialog('${article.id}')" style="padding: 6px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Assign 2 Annotators</button>` :
                                 `<div>
-                                    ${(article.assignedAnnotators || []).map(ann => `<div style="margin-bottom: 4px;"><span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.85em;">${ann}</span></div>`).join('')}
+                                    ${(article.assignedAnnotators || []).map(ann => {
+                                        const name = typeof ann === 'string' ? ann : ann.name;
+                                        return `<div style="margin-bottom: 4px;"><span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.85em;">${name}</span></div>`;
+                                    }).join('')}
                                 </div>`
                             }
                         </td>
@@ -3285,7 +3301,11 @@
             // Create selection dialog
             let dialog = `Select TWO annotators for this article:\n\n`;
             annotators.forEach((ann, i) => {
-                dialog += `${i + 1}. ${ann}\n`;
+                dialog += `${i + 1}. ${ann.name}`;
+                if (ann.email) {
+                    dialog += ` (${ann.email})`;
+                }
+                dialog += `\n`;
             });
             dialog += `\nEnter annotator numbers separated by comma (e.g., "1,2"):`;
 
@@ -3308,7 +3328,27 @@
             article.status = 'assigned';
             saveQueue();
             renderQueue();
-            alert(`Article assigned to: ${selected.join(' and ')}`);
+
+            // Show success message
+            const names = selected.map(a => a.name).join(' and ');
+            alert(`Article assigned to: ${names}`);
+
+            // Send email notifications if emails are configured
+            selected.forEach(annotator => {
+                if (annotator.email) {
+                    sendAnnotatorNotification(annotator, article);
+                }
+            });
+        }
+
+        // Send email notification to annotator
+        function sendAnnotatorNotification(annotator, article) {
+            const subject = encodeURIComponent(`New Article Assignment: ${article.title}`);
+            const body = encodeURIComponent(`Hello ${annotator.name},\n\nYou have been assigned to annotate the following article:\n\nTitle: ${article.title}\nSource: ${article.source}\nURL: ${article.url}\n\nPlease log in to the annotation system to begin your work.\n\nThank you!`);
+            const mailtoLink = `mailto:${annotator.email}?subject=${subject}&body=${body}`;
+
+            // Open mailto link in new window
+            window.open(mailtoLink, '_blank');
         }
 
         // Remove article from queue
@@ -3345,14 +3385,48 @@
 
         // Manage annotators
         function manageAnnotators() {
-            const currentList = annotators.join('\n');
-            const newList = prompt('Enter annotator names (one per line):\n\nCurrent annotators:', currentList);
+            let dialogContent = '<div style="font-family: Arial, sans-serif;">';
+            dialogContent += '<h3 style="margin-top: 0;">Manage Annotators</h3>';
+            dialogContent += '<p>Current annotators:</p>';
+            dialogContent += '<ul style="list-style: none; padding: 0;">';
 
-            if (newList !== null) {
-                annotators = newList.split('\n').map(name => name.trim()).filter(name => name.length > 0);
-                if (annotators.length === 0) {
-                    annotators = ['Annotator 1'];
+            annotators.forEach((ann, i) => {
+                dialogContent += `<li style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">`;
+                dialogContent += `<strong>${i + 1}. ${ann.name}</strong>`;
+                if (ann.email) {
+                    dialogContent += ` - ${ann.email}`;
                 }
+                dialogContent += `</li>`;
+            });
+
+            dialogContent += '</ul>';
+            dialogContent += '<p style="margin-top: 20px;">Enter annotators as: Name, Email (one per line)</p>';
+            dialogContent += '<p style="font-size: 0.9em; color: #666;">Example: John Doe, john@example.com</p>';
+            dialogContent += '</div>';
+
+            // Show current list in a readable format
+            const currentList = annotators.map(ann => `${ann.name}, ${ann.email || ''}`).join('\n');
+
+            // Create a custom prompt
+            const newList = prompt(dialogContent.replace(/<[^>]*>/g, '') + '\n\nCurrent annotators:\n' + currentList);
+
+            if (newList !== null && newList.trim() !== '') {
+                const newAnnotators = newList.split('\n')
+                    .map(line => {
+                        const parts = line.split(',').map(p => p.trim());
+                        return {
+                            name: parts[0] || '',
+                            email: parts[1] || ''
+                        };
+                    })
+                    .filter(ann => ann.name.length > 0);
+
+                if (newAnnotators.length === 0) {
+                    alert('At least one annotator is required!');
+                    return;
+                }
+
+                annotators = newAnnotators;
                 saveAnnotators();
                 renderQueue();
                 alert('Annotators updated successfully!');
@@ -3640,7 +3714,8 @@
 
             let annotatorPrompt = 'Which annotator are you?\n\n';
             assignedAnnotators.forEach((ann, i) => {
-                annotatorPrompt += `${i + 1}. ${ann}\n`;
+                const name = typeof ann === 'string' ? ann : ann.name;
+                annotatorPrompt += `${i + 1}. ${name}\n`;
             });
             annotatorPrompt += '\nEnter number (1 or 2):';
 
@@ -3653,7 +3728,8 @@
                 return;
             }
 
-            currentAnnotator = assignedAnnotators[index];
+            const selectedAnnotator = assignedAnnotators[index];
+            currentAnnotator = typeof selectedAnnotator === 'string' ? selectedAnnotator : selectedAnnotator.name;
 
             // Check if article has text content - if not, auto-fetch from URL
             if (!article.articleText || article.articleText.trim() === '') {
@@ -3712,41 +3788,111 @@
 
         // Fetch article text from URL
         async function fetchArticleText(article) {
+            // Show loading indicator
+            showFetchStatus('Fetching article text...', 'info');
+
             try {
                 // Try using a CORS proxy to fetch the article
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(article.url)}`;
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxyUrl, { timeout: 15000 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch article');
+                    throw new Error(`Failed to fetch article (Status: ${response.status})`);
                 }
 
                 const html = await response.text();
 
-                // Simple text extraction - strip HTML tags
+                if (!html || html.length < 100) {
+                    throw new Error('No content received from URL');
+                }
+
+                // Create a temporary DOM element for parsing
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
 
-                // Remove script and style tags
-                const scripts = tempDiv.querySelectorAll('script, style, nav, header, footer');
-                scripts.forEach(el => el.remove());
+                // Remove unwanted elements
+                const unwantedSelectors = 'script, style, nav, header, footer, iframe, noscript, aside, .advertisement, .ad, .sidebar, .menu, .navigation';
+                tempDiv.querySelectorAll(unwantedSelectors).forEach(el => el.remove());
 
-                // Get text content
-                let text = tempDiv.textContent || tempDiv.innerText || '';
+                // Try to find the main article content
+                let articleContent = null;
 
-                // Clean up whitespace
-                text = text.replace(/\s+/g, ' ').trim();
+                // Method 1: Look for article tag
+                articleContent = tempDiv.querySelector('article');
 
-                if (text.length < 100) {
-                    throw new Error('Article text too short - may not have extracted correctly');
+                // Method 2: Look for main tag
+                if (!articleContent || articleContent.textContent.length < 200) {
+                    articleContent = tempDiv.querySelector('main');
                 }
 
+                // Method 3: Look for common article content classes/ids
+                if (!articleContent || articleContent.textContent.length < 200) {
+                    const contentSelectors = [
+                        '[class*="article-content"]',
+                        '[class*="article-body"]',
+                        '[class*="post-content"]',
+                        '[class*="entry-content"]',
+                        '[id*="article-content"]',
+                        '[id*="article-body"]',
+                        '[class*="story-body"]',
+                        '[class*="content-body"]'
+                    ];
+
+                    for (const selector of contentSelectors) {
+                        const found = tempDiv.querySelector(selector);
+                        if (found && found.textContent.length > 200) {
+                            articleContent = found;
+                            break;
+                        }
+                    }
+                }
+
+                // Method 4: Find the element with the most text (likely the article)
+                if (!articleContent || articleContent.textContent.length < 200) {
+                    let maxLength = 0;
+                    tempDiv.querySelectorAll('div, section').forEach(el => {
+                        const textLength = el.textContent.length;
+                        if (textLength > maxLength) {
+                            maxLength = textLength;
+                            articleContent = el;
+                        }
+                    });
+                }
+
+                // Extract text content
+                let text = articleContent ? articleContent.textContent : tempDiv.textContent;
+                if (!text) {
+                    text = tempDiv.innerText || '';
+                }
+
+                // Clean up the text
+                text = text
+                    .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
+                    .replace(/\n+/g, ' ')  // Replace newlines with space
+                    .replace(/\t+/g, ' ')  // Replace tabs with space
+                    .trim();
+
+                // Validate extracted text
+                if (text.length < 100) {
+                    throw new Error('Extracted text too short. The article content may be behind a paywall or require JavaScript.');
+                }
+
+                // Check if we got meaningful sentences
+                const sentences = parseSentences(text);
+                if (sentences.length < 3) {
+                    throw new Error('Could not extract enough sentences. Please try pasting the article text manually.');
+                }
+
+                // Success!
                 article.articleText = text;
                 saveQueue();
-                alert('Article text fetched successfully!');
+                showFetchStatus(`✓ Article text fetched successfully! (${sentences.length} sentences)`, 'success');
+
+                return text;
 
             } catch (error) {
                 console.error('Error fetching article:', error);
+                showFetchStatus(`✗ Failed to fetch article: ${error.message}`, 'error');
                 throw error;
             }
         }
