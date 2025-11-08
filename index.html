@@ -2754,6 +2754,12 @@
                         👥 Manage Annotators
                     </button>
                 </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Export Data:</label>
+                    <button onclick="exportAllAnnotations()" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                        📥 Export Training Data
+                    </button>
+                </div>
             </div>
 
             <!-- Queue Table -->
@@ -2918,6 +2924,9 @@
                 <div style="margin-top: 30px; text-align: center;">
                     <button type="button" class="btn-success" onclick="approveForPublication()" id="publishButton" style="display: none; margin-right: 10px;">
                         Approve for Publication
+                    </button>
+                    <button type="button" class="btn-primary" onclick="exportSingleArticle(currentArticleId)" style="margin-right: 10px;">
+                        📥 Export This Article
                     </button>
                     <button type="button" class="btn-secondary" onclick="backToQueue()">
                         Back to Queue
@@ -3594,6 +3603,185 @@
             currentAnnotations = [];
             selectedSentenceIndex = null;
             showView('articleQueue');
+        }
+
+        // ============ EXPORT FUNCTIONS FOR ML TRAINING ============
+
+        // Export all annotated articles
+        function exportAllAnnotations() {
+            const annotatedArticles = articleQueue.filter(article =>
+                article.annotations && Object.keys(article.annotations).length >= 2
+            );
+
+            if (annotatedArticles.length === 0) {
+                alert('No annotated articles found. Please complete annotations on at least one article.');
+                return;
+            }
+
+            const exportData = buildTrainingDataset(annotatedArticles);
+            downloadJSON(exportData, `bias-training-data-${getCurrentDateString()}.json`);
+
+            alert(`Exported ${annotatedArticles.length} article(s) with annotations for ML training.`);
+        }
+
+        // Export a single article
+        function exportSingleArticle(articleId) {
+            const article = articleQueue.find(a => a.id === articleId);
+            if (!article || !article.annotations) {
+                alert('No annotations found for this article.');
+                return;
+            }
+
+            const exportData = buildTrainingDataset([article]);
+            downloadJSON(exportData, `bias-training-data-${article.id}-${getCurrentDateString()}.json`);
+
+            alert('Article exported successfully!');
+        }
+
+        // Build ML-friendly training dataset
+        function buildTrainingDataset(articles) {
+            const dataset = {
+                metadata: {
+                    version: "1.0",
+                    export_date: new Date().toISOString(),
+                    total_articles: articles.length,
+                    bias_types: [
+                        "word-choice", "omission", "source", "placement",
+                        "labeling", "framing", "false-balance", "sensationalism",
+                        "opinion-as-fact", "partisan"
+                    ],
+                    annotation_schema: {
+                        sentence: "The text of the sentence",
+                        annotations: "Array of annotations from different annotators",
+                        has_bias: "Boolean indicating if any annotator found bias",
+                        agreement: "Boolean indicating if annotators agree on this sentence",
+                        primary_bias_type: "The main type of bias identified",
+                        explanation: "Human explanation of the bias"
+                    }
+                },
+                articles: articles.map(article => buildArticleTrainingData(article))
+            };
+
+            return dataset;
+        }
+
+        // Build training data for a single article
+        function buildArticleTrainingData(article) {
+            const sentences = parseSentences(article.articleText || '');
+            const annotatorNames = Object.keys(article.annotations || {});
+
+            // Build sentence-level data
+            const sentenceData = sentences.map((sentenceText, index) => {
+                const sentenceAnnotations = [];
+
+                // Collect annotations from all annotators for this sentence
+                annotatorNames.forEach(annotatorName => {
+                    const annotations = article.annotations[annotatorName] || [];
+                    const annotation = annotations.find(ann => ann.sentenceIndex === index);
+
+                    if (annotation) {
+                        sentenceAnnotations.push({
+                            annotator: annotatorName,
+                            has_bias: true,
+                            primary_bias_type: annotation.primaryBias,
+                            secondary_bias_type: annotation.secondaryBias || null,
+                            explanation: annotation.comment,
+                            timestamp: annotation.timestamp
+                        });
+                    } else {
+                        sentenceAnnotations.push({
+                            annotator: annotatorName,
+                            has_bias: false,
+                            primary_bias_type: null,
+                            secondary_bias_type: null,
+                            explanation: null,
+                            timestamp: null
+                        });
+                    }
+                });
+
+                // Determine agreement
+                const biasedAnnotations = sentenceAnnotations.filter(a => a.has_bias);
+                let agreement = false;
+
+                if (biasedAnnotations.length === 0) {
+                    // All agree there's no bias
+                    agreement = true;
+                } else if (biasedAnnotations.length === annotatorNames.length) {
+                    // All found bias - check if they agree on type
+                    const biasTypes = biasedAnnotations.map(a => a.primary_bias_type);
+                    agreement = biasTypes.every(type => type === biasTypes[0]);
+                } else {
+                    // Some found bias, others didn't - disagreement
+                    agreement = false;
+                }
+
+                return {
+                    sentence_index: index,
+                    text: sentenceText,
+                    annotations: sentenceAnnotations,
+                    has_bias: biasedAnnotations.length > 0,
+                    agreement: agreement,
+                    consensus_label: agreement && biasedAnnotations.length > 0 ?
+                        biasedAnnotations[0].primary_bias_type : null
+                };
+            });
+
+            // Calculate statistics
+            const totalSentences = sentenceData.length;
+            const biasedSentences = sentenceData.filter(s => s.has_bias).length;
+            const agreedSentences = sentenceData.filter(s => s.agreement).length;
+            const disagreedSentences = totalSentences - agreedSentences;
+
+            return {
+                article_id: article.id,
+                metadata: {
+                    title: article.title,
+                    source: article.source,
+                    url: article.url,
+                    date_added: article.dateAdded,
+                    priority: article.priority,
+                    notes: article.notes || null
+                },
+                full_text: article.articleText || '',
+                annotators: annotatorNames,
+                statistics: {
+                    total_sentences: totalSentences,
+                    biased_sentences: biasedSentences,
+                    neutral_sentences: totalSentences - biasedSentences,
+                    agreed_sentences: agreedSentences,
+                    disagreed_sentences: disagreedSentences,
+                    agreement_score: article.agreementScore || null,
+                    passes_threshold: article.agreementDetails?.passes || false
+                },
+                sentences: sentenceData,
+                quality_metrics: {
+                    inter_annotator_agreement: article.agreementScore || null,
+                    annotation_date: article.approvedDate || new Date().toISOString(),
+                    status: article.annotationStatus || 'completed'
+                }
+            };
+        }
+
+        // Helper: Download JSON file
+        function downloadJSON(data, filename) {
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Helper: Get current date string for filenames
+        function getCurrentDateString() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
         }
 
         // Animate metrics on load
