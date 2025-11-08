@@ -1271,6 +1271,7 @@
             <button class="tab-btn" onclick="showView('phase2')">Phase 2: AI-Augmented</button>
             <button class="tab-btn" onclick="showView('production')">Content Production</button>
             <button class="tab-btn" onclick="showView('articleQueue')">Article Queue</button>
+            <button class="tab-btn" onclick="showView('annotatorQueue')">Annotator Queue</button>
         </div>
 
         <!-- SYSTEM OVERVIEW -->
@@ -3045,6 +3046,76 @@
             </div>
         </div>
 
+        <!-- ANNOTATOR QUEUE -->
+        <div id="annotatorQueue" class="dashboard-view">
+            <div class="section-header">My Annotation Queue</div>
+
+            <!-- Annotator Selection -->
+            <div class="highlight-box info" style="margin-bottom: 30px;">
+                <div class="highlight-title">👤 Who are you?</div>
+                <div style="margin-top: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Select your name to view your assigned articles:</label>
+                    <select id="currentAnnotatorSelect" onchange="updateAnnotatorQueue()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1.1em;">
+                        <option value="">-- Select Annotator --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Queue Statistics for Annotator -->
+            <div id="annotatorStatsContainer" style="display: none;">
+                <div class="metrics-grid" style="margin-bottom: 30px;">
+                    <div class="metric-card">
+                        <div class="metric-icon">📝</div>
+                        <div class="metric-value" id="myAssignedArticles">0</div>
+                        <div class="metric-label">Assigned to Me</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">⏳</div>
+                        <div class="metric-value" id="myPendingArticles">0</div>
+                        <div class="metric-label">Waiting to Annotate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">✅</div>
+                        <div class="metric-value" id="myCompletedArticles">0</div>
+                        <div class="metric-label">Completed</div>
+                    </div>
+                </div>
+
+                <!-- My Articles Table -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                    <h3 style="margin-bottom: 20px; color: #1e3a5f;">My Assigned Articles</h3>
+                    <div id="annotatorQueueTableContainer" style="overflow-x: auto;">
+                        <table id="annotatorQueueTable" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Priority</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Title</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Source</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Date Assigned</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="annotatorQueueTableBody">
+                                <tr>
+                                    <td colspan="6" style="padding: 40px; text-align: center; color: #6c757d;">
+                                        Select an annotator above to view assigned articles.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="annotatorEmptyState" style="text-align: center; padding: 60px 20px; color: #6c757d;">
+                <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
+                <h3 style="color: #1e3a5f; margin-bottom: 10px;">Welcome to Your Annotation Queue</h3>
+                <p>Select your name above to view articles assigned to you.</p>
+            </div>
+        </div>
+
         <!-- ANNOTATION INTERFACE -->
         <div id="annotationInterface" class="dashboard-view">
             <div class="section-header">Bias Annotation Interface</div>
@@ -3411,6 +3482,11 @@
                     </tr>
                 `;
             }).join('');
+
+            // Update annotator queue if an annotator is selected
+            if (selectedAnnotatorName) {
+                renderAnnotatorQueue();
+            }
         }
 
         // Open dialog to assign two annotators
@@ -3590,6 +3666,237 @@
             if (event.target === modal) {
                 closeAnnotatorModal();
             }
+        });
+
+        // ============ ANNOTATOR QUEUE SYSTEM ============
+
+        let selectedAnnotatorName = null;
+
+        // Populate annotator dropdown when page loads or annotators change
+        function populateAnnotatorSelect() {
+            const select = document.getElementById('currentAnnotatorSelect');
+            if (!select) return;
+
+            // Save current selection
+            const currentValue = select.value;
+
+            // Clear existing options except first one
+            select.innerHTML = '<option value="">-- Select Annotator --</option>';
+
+            // Add annotators
+            annotators.forEach(ann => {
+                const option = document.createElement('option');
+                option.value = ann.name;
+                option.textContent = ann.name;
+                select.appendChild(option);
+            });
+
+            // Restore selection if it still exists
+            if (currentValue && annotators.some(a => a.name === currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        // Update annotator queue when annotator is selected
+        function updateAnnotatorQueue() {
+            const select = document.getElementById('currentAnnotatorSelect');
+            selectedAnnotatorName = select.value;
+
+            if (!selectedAnnotatorName) {
+                // Hide stats and table, show empty state
+                document.getElementById('annotatorStatsContainer').style.display = 'none';
+                document.getElementById('annotatorEmptyState').style.display = 'block';
+                return;
+            }
+
+            // Show stats and table, hide empty state
+            document.getElementById('annotatorStatsContainer').style.display = 'block';
+            document.getElementById('annotatorEmptyState').style.display = 'none';
+
+            // Render the queue for this annotator
+            renderAnnotatorQueue();
+        }
+
+        // Render the annotator's queue
+        function renderAnnotatorQueue() {
+            if (!selectedAnnotatorName) return;
+
+            const tbody = document.getElementById('annotatorQueueTableBody');
+            if (!tbody) return;
+
+            // Filter articles assigned to this annotator
+            const myArticles = articleQueue.filter(article => {
+                if (!article.assignedAnnotators || article.assignedAnnotators.length === 0) {
+                    return false;
+                }
+                return article.assignedAnnotators.some(ann => {
+                    const name = typeof ann === 'string' ? ann : ann.name;
+                    return name === selectedAnnotatorName;
+                });
+            });
+
+            // Update statistics
+            const myAssigned = myArticles.length;
+            const myPending = myArticles.filter(a => a.status === 'assigned').length;
+            const myCompleted = myArticles.filter(a => {
+                // Check if this specific annotator has completed their annotations
+                return a.annotations && a.annotations[selectedAnnotatorName];
+            }).length;
+
+            document.getElementById('myAssignedArticles').textContent = myAssigned;
+            document.getElementById('myPendingArticles').textContent = myPending;
+            document.getElementById('myCompletedArticles').textContent = myCompleted;
+
+            // Sort by priority and date
+            const priorityOrder = { high: 1, medium: 2, low: 3 };
+            myArticles.sort((a, b) => {
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return new Date(b.dateAdded) - new Date(a.dateAdded);
+            });
+
+            if (myArticles.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: #6c757d;">
+                            No articles assigned to you yet. Check back later!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = myArticles.map(article => {
+                const priorityColor = {
+                    high: '#dc3545',
+                    medium: '#ffc107',
+                    low: '#28a745'
+                };
+
+                // Check if this annotator has completed their annotations
+                const hasMyAnnotations = article.annotations && article.annotations[selectedAnnotatorName];
+                const myStatus = hasMyAnnotations ? 'Completed' : 'Pending';
+                const statusColor = hasMyAnnotations ? '#28a745' : '#ffc107';
+                const statusTextColor = hasMyAnnotations ? 'white' : '#000';
+
+                return `
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px;">
+                            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${priorityColor[article.priority]};"></span>
+                            <span style="margin-left: 8px; font-weight: 600; text-transform: capitalize;">${article.priority}</span>
+                        </td>
+                        <td style="padding: 12px;">
+                            <a href="${article.url}" target="_blank" style="color: #2c5282; text-decoration: none; font-weight: 500;">${article.title}</a>
+                            ${article.notes ? `<br><small style="color: #6c757d;">${article.notes}</small>` : ''}
+                        </td>
+                        <td style="padding: 12px;">${article.source}</td>
+                        <td style="padding: 12px;">${new Date(article.dateAdded).toLocaleDateString()}</td>
+                        <td style="padding: 12px;">
+                            <span style="background: ${statusColor}; color: ${statusTextColor}; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;">${myStatus}</span>
+                        </td>
+                        <td style="padding: 12px;">
+                            ${!hasMyAnnotations ?
+                                `<button onclick="startAnnotationAsAnnotator('${article.id}', '${selectedAnnotatorName}')" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95em; font-weight: 600;">
+                                    📝 Start Annotating
+                                </button>` :
+                                `<button onclick="startAnnotationAsAnnotator('${article.id}', '${selectedAnnotatorName}')" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95em;">
+                                    ✏️ Edit Annotations
+                                </button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Start annotation directly as a specific annotator (from annotator queue)
+        async function startAnnotationAsAnnotator(articleId, annotatorName) {
+            const article = articleQueue.find(a => a.id === articleId);
+            if (!article) return;
+
+            // Set the current annotator directly
+            currentAnnotator = annotatorName;
+
+            // Check if article has text content - if not, auto-fetch from URL
+            if (!article.articleText || article.articleText.trim() === '') {
+                if (!article.url) {
+                    alert('No article URL available. Cannot fetch article text.');
+                    return;
+                }
+
+                // Show loading message and automatically try to fetch
+                console.log('Article text not found, attempting auto-fetch from:', article.url);
+                showFetchStatus(`Fetching article text from ${new URL(article.url).hostname}...`, 'loading');
+
+                try {
+                    await fetchArticleText(article);
+                    console.log('Article text fetched successfully');
+                } catch (error) {
+                    console.error('Auto-fetch failed:', error);
+
+                    // If auto-fetch fails, offer manual paste option
+                    const userChoice = confirm(`Auto-fetch failed: ${error.message}\n\nWould you like to paste the article text manually instead?\n\nClick OK to paste manually, or Cancel to go back.`);
+
+                    if (userChoice) {
+                        const articleText = prompt('Please paste the full article text here:');
+                        if (!articleText || articleText.trim() === '') {
+                            alert('Article text is required to begin annotation. Please try again.');
+                            return;
+                        }
+                        article.articleText = articleText.trim();
+                        saveQueue();
+                        showFetchStatus('Article text added manually', 'success');
+                    } else {
+                        // User cancelled
+                        showFetchStatus('Annotation cancelled', 'warning');
+                        return;
+                    }
+                }
+            }
+
+            // Initialize annotations structure if not exists
+            if (!article.annotations) {
+                article.annotations = {};
+            }
+
+            currentArticleId = articleId;
+            currentAnnotations = article.annotations[currentAnnotator] || [];
+
+            // Switch to annotation view
+            showView('annotationInterface');
+
+            // Set up the annotation interface
+            document.getElementById('annArticleTitle').textContent = article.title;
+            document.getElementById('annArticleSource').textContent = article.source;
+            document.getElementById('annCurrentAnnotator').textContent = currentAnnotator;
+            document.getElementById('annStatus').textContent = 'In Progress';
+
+            // Parse and display article text
+            displayArticleText(article.articleText);
+
+            // Show work area
+            document.getElementById('annotationWorkArea').style.display = 'block';
+            document.getElementById('comparisonView').classList.remove('active');
+            document.getElementById('noArticlePlaceholder').style.display = 'none';
+
+            // Update annotation list
+            updateAnnotationList();
+        }
+
+        // Update annotator dropdown when annotators change
+        const originalSaveAnnotators = saveAnnotators;
+        saveAnnotators = function() {
+            originalSaveAnnotators();
+            populateAnnotatorSelect();
+            if (selectedAnnotatorName) {
+                renderAnnotatorQueue();
+            }
+        };
+
+        // Initialize annotator queue on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            populateAnnotatorSelect();
         });
 
         // ============ AUTO-INGESTION SYSTEM ============
