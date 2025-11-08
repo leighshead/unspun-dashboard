@@ -3162,7 +3162,7 @@
                         notes: document.getElementById('articleNotes').value,
                         dateAdded: new Date().toISOString(),
                         status: 'pending',
-                        assignedTo: null
+                        assignedAnnotators: []
                     };
 
                     articleQueue.push(article);
@@ -3244,17 +3244,16 @@
                         <td style="padding: 12px;">${new Date(article.dateAdded).toLocaleDateString()}</td>
                         <td style="padding: 12px;">${statusBadge[article.status]}</td>
                         <td style="padding: 12px;">
-                            ${article.status !== 'pending' ?
-                                `<span style="font-weight: 500;">${article.assignedTo || 'N/A'}</span>` :
-                                `<select onchange="assignArticle('${article.id}', this.value)" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                                    <option value="">Assign to...</option>
-                                    ${annotators.map(ann => `<option value="${ann}">${ann}</option>`).join('')}
-                                </select>`
+                            ${article.status === 'pending' ?
+                                `<button onclick="openAssignDialog('${article.id}')" style="padding: 6px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Assign 2 Annotators</button>` :
+                                `<div>
+                                    ${(article.assignedAnnotators || []).map(ann => `<div style="margin-bottom: 4px;"><span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.85em;">${ann}</span></div>`).join('')}
+                                </div>`
                             }
                         </td>
                         <td style="padding: 12px;">
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                ${article.status === 'assigned' ?
+                                ${article.status === 'assigned' && article.assignedAnnotators && article.assignedAnnotators.length >= 2 ?
                                     `<button onclick="startAnnotation('${article.id}')" style="padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">📝 Annotate</button>` :
                                     ''
                                 }
@@ -3273,17 +3272,43 @@
             }).join('');
         }
 
-        // Assign article to annotator
-        function assignArticle(articleId, annotator) {
-            if (!annotator) return;
-
+        // Open dialog to assign two annotators
+        function openAssignDialog(articleId) {
             const article = articleQueue.find(a => a.id === articleId);
-            if (article) {
-                article.status = 'assigned';
-                article.assignedTo = annotator;
-                saveQueue();
-                renderQueue();
+            if (!article) return;
+
+            if (annotators.length < 2) {
+                alert('You need at least 2 annotators configured. Please add annotators first.');
+                return;
             }
+
+            // Create selection dialog
+            let dialog = `Select TWO annotators for this article:\n\n`;
+            annotators.forEach((ann, i) => {
+                dialog += `${i + 1}. ${ann}\n`;
+            });
+            dialog += `\nEnter annotator numbers separated by comma (e.g., "1,2"):`;
+
+            const selection = prompt(dialog);
+            if (!selection) return;
+
+            const indices = selection.split(',').map(s => parseInt(s.trim()) - 1);
+            if (indices.length !== 2) {
+                alert('Please select exactly 2 annotators.');
+                return;
+            }
+
+            const selected = indices.map(i => annotators[i]).filter(a => a);
+            if (selected.length !== 2) {
+                alert('Invalid selection. Please try again.');
+                return;
+            }
+
+            article.assignedAnnotators = selected;
+            article.status = 'assigned';
+            saveQueue();
+            renderQueue();
+            alert(`Article assigned to: ${selected.join(' and ')}`);
         }
 
         // Remove article from queue
@@ -3435,7 +3460,7 @@
                         notes: article.description || '',
                         dateAdded: new Date().toISOString(),
                         status: 'pending',
-                        assignedTo: null,
+                        assignedAnnotators: [],
                         articleText: article.content || article.description || ''
                     };
 
@@ -3509,7 +3534,7 @@
                             notes: item.description ? stripHtmlTags(item.description).substring(0, 200) : '',
                             dateAdded: new Date().toISOString(),
                             status: 'pending',
-                            assignedTo: null,
+                            assignedAnnotators: [],
                             articleText: item.content ? stripHtmlTags(item.content) : ''
                         };
 
@@ -3602,19 +3627,58 @@
         let selectedSentenceIndex = null;
 
         // Start annotation for an article
-        function startAnnotation(articleId) {
+        async function startAnnotation(articleId) {
             const article = articleQueue.find(a => a.id === articleId);
             if (!article) return;
 
-            // Check if article has text content
+            // Ask which annotator is working
+            const assignedAnnotators = article.assignedAnnotators || [];
+            if (assignedAnnotators.length === 0) {
+                alert('No annotators assigned to this article.');
+                return;
+            }
+
+            let annotatorPrompt = 'Which annotator are you?\n\n';
+            assignedAnnotators.forEach((ann, i) => {
+                annotatorPrompt += `${i + 1}. ${ann}\n`;
+            });
+            annotatorPrompt += '\nEnter number (1 or 2):';
+
+            const selection = prompt(annotatorPrompt);
+            if (!selection) return;
+
+            const index = parseInt(selection) - 1;
+            if (index < 0 || index >= assignedAnnotators.length) {
+                alert('Invalid selection.');
+                return;
+            }
+
+            currentAnnotator = assignedAnnotators[index];
+
+            // Check if article has text content - if not, auto-fetch from URL
             if (!article.articleText || article.articleText.trim() === '') {
-                const articleText = prompt('Please paste the full article text to begin annotation:');
-                if (!articleText || articleText.trim() === '') {
-                    alert('Article text is required to begin annotation.');
+                if (!article.url) {
+                    alert('No article URL available. Cannot fetch article text.');
                     return;
                 }
-                article.articleText = articleText.trim();
-                saveQueue();
+
+                // Show loading message
+                if (confirm(`Article text not found. Fetch article content from:\n${article.url}\n\nNote: This may not work for all websites due to CORS restrictions.`)) {
+                    try {
+                        await fetchArticleText(article);
+                    } catch (error) {
+                        // If auto-fetch fails, ask for manual paste
+                        const articleText = prompt('Auto-fetch failed. Please paste the full article text to begin annotation:');
+                        if (!articleText || articleText.trim() === '') {
+                            alert('Article text is required to begin annotation.');
+                            return;
+                        }
+                        article.articleText = articleText.trim();
+                        saveQueue();
+                    }
+                } else {
+                    return;
+                }
             }
 
             // Initialize annotations structure if not exists
@@ -3623,7 +3687,6 @@
             }
 
             currentArticleId = articleId;
-            currentAnnotator = article.assignedTo;
             currentAnnotations = article.annotations[currentAnnotator] || [];
 
             // Switch to annotation view
@@ -3645,6 +3708,47 @@
 
             // Update annotation list
             updateAnnotationList();
+        }
+
+        // Fetch article text from URL
+        async function fetchArticleText(article) {
+            try {
+                // Try using a CORS proxy to fetch the article
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(article.url)}`;
+                const response = await fetch(proxyUrl);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch article');
+                }
+
+                const html = await response.text();
+
+                // Simple text extraction - strip HTML tags
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+
+                // Remove script and style tags
+                const scripts = tempDiv.querySelectorAll('script, style, nav, header, footer');
+                scripts.forEach(el => el.remove());
+
+                // Get text content
+                let text = tempDiv.textContent || tempDiv.innerText || '';
+
+                // Clean up whitespace
+                text = text.replace(/\s+/g, ' ').trim();
+
+                if (text.length < 100) {
+                    throw new Error('Article text too short - may not have extracted correctly');
+                }
+
+                article.articleText = text;
+                saveQueue();
+                alert('Article text fetched successfully!');
+
+            } catch (error) {
+                console.error('Error fetching article:', error);
+                throw error;
+            }
         }
 
         // Parse text into sentences and display
