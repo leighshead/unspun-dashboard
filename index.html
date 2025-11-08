@@ -3945,22 +3945,33 @@
                     return;
                 }
 
-                // Show loading message
-                if (confirm(`Article text not found. Fetch article content from:\n${article.url}\n\nNote: This may not work for all websites due to CORS restrictions.`)) {
-                    try {
-                        await fetchArticleText(article);
-                    } catch (error) {
-                        // If auto-fetch fails, ask for manual paste
-                        const articleText = prompt('Auto-fetch failed. Please paste the full article text to begin annotation:');
+                // Show loading message and automatically try to fetch
+                console.log('Article text not found, attempting auto-fetch from:', article.url);
+                showFetchStatus(`Fetching article text from ${new URL(article.url).hostname}...`, 'loading');
+
+                try {
+                    await fetchArticleText(article);
+                    console.log('Article text fetched successfully');
+                } catch (error) {
+                    console.error('Auto-fetch failed:', error);
+
+                    // If auto-fetch fails, offer manual paste option
+                    const userChoice = confirm(`Auto-fetch failed: ${error.message}\n\nWould you like to paste the article text manually instead?\n\nClick OK to paste manually, or Cancel to go back.`);
+
+                    if (userChoice) {
+                        const articleText = prompt('Please paste the full article text here:');
                         if (!articleText || articleText.trim() === '') {
-                            alert('Article text is required to begin annotation.');
+                            alert('Article text is required to begin annotation. Please try again.');
                             return;
                         }
                         article.articleText = articleText.trim();
                         saveQueue();
+                        showFetchStatus('Article text added manually', 'success');
+                    } else {
+                        // User cancelled
+                        showFetchStatus('Annotation cancelled', 'warning');
+                        return;
                     }
-                } else {
-                    return;
                 }
             }
 
@@ -3995,19 +4006,23 @@
 
         // Fetch article text from URL
         async function fetchArticleText(article) {
-            // Show loading indicator
-            showFetchStatus('Fetching article text...', 'info');
+            console.log('fetchArticleText called for:', article.url);
 
             try {
                 // Try using a CORS proxy to fetch the article
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(article.url)}`;
-                const response = await fetch(proxyUrl, { timeout: 15000 });
+                console.log('Using CORS proxy:', proxyUrl);
+
+                const response = await fetch(proxyUrl);
+
+                console.log('Fetch response status:', response.status, response.statusText);
 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch article (Status: ${response.status})`);
+                    throw new Error(`Failed to fetch article (Status: ${response.status} ${response.statusText})`);
                 }
 
                 const html = await response.text();
+                console.log('Received HTML length:', html.length);
 
                 if (!html || html.length < 100) {
                     throw new Error('No content received from URL');
@@ -4026,10 +4041,16 @@
 
                 // Method 1: Look for article tag
                 articleContent = tempDiv.querySelector('article');
+                if (articleContent && articleContent.textContent.length >= 200) {
+                    console.log('Found content using <article> tag');
+                }
 
                 // Method 2: Look for main tag
                 if (!articleContent || articleContent.textContent.length < 200) {
                     articleContent = tempDiv.querySelector('main');
+                    if (articleContent && articleContent.textContent.length >= 200) {
+                        console.log('Found content using <main> tag');
+                    }
                 }
 
                 // Method 3: Look for common article content classes/ids
@@ -4049,6 +4070,7 @@
                         const found = tempDiv.querySelector(selector);
                         if (found && found.textContent.length > 200) {
                             articleContent = found;
+                            console.log('Found content using selector:', selector);
                             break;
                         }
                     }
@@ -4056,6 +4078,7 @@
 
                 // Method 4: Find the element with the most text (likely the article)
                 if (!articleContent || articleContent.textContent.length < 200) {
+                    console.log('Using fallback method: finding element with most text');
                     let maxLength = 0;
                     tempDiv.querySelectorAll('div, section').forEach(el => {
                         const textLength = el.textContent.length;
@@ -4064,6 +4087,7 @@
                             articleContent = el;
                         }
                     });
+                    console.log('Found element with', maxLength, 'characters');
                 }
 
                 // Extract text content
@@ -4080,12 +4104,16 @@
                     .trim();
 
                 // Validate extracted text
+                console.log('Extracted text length:', text.length);
+
                 if (text.length < 100) {
                     throw new Error('Extracted text too short. The article content may be behind a paywall or require JavaScript.');
                 }
 
                 // Check if we got meaningful sentences
                 const sentences = parseSentences(text);
+                console.log('Parsed sentences count:', sentences.length);
+
                 if (sentences.length < 3) {
                     throw new Error('Could not extract enough sentences. Please try pasting the article text manually.');
                 }
@@ -4093,13 +4121,14 @@
                 // Success!
                 article.articleText = text;
                 saveQueue();
+                console.log('✓ Article text saved successfully');
                 showFetchStatus(`✓ Article text fetched successfully! (${sentences.length} sentences)`, 'success');
 
                 return text;
 
             } catch (error) {
-                console.error('Error fetching article:', error);
-                showFetchStatus(`✗ Failed to fetch article: ${error.message}`, 'error');
+                console.error('✗ Error fetching article:', error);
+                showFetchStatus(`✗ Failed to fetch: ${error.message}`, 'error');
                 throw error;
             }
         }
