@@ -1411,6 +1411,929 @@
             color: #6c757d;
             font-size: 0.9em;
         }
+
+        /* Content Mockups Styles */
+        .mockups-intro {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .sample-data-note {
+            background: #e8f4fd;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            color: #2c3e50;
+            margin-top: 15px;
+        }
+
+        .mockups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .mockup-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .mockup-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .mockup-header h3 {
+            color: #1e3a5f;
+            font-size: 1.3em;
+            margin: 0;
+        }
+
+        .platform-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .platform-instagram {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+        }
+
+        .platform-twitter {
+            background: #000000;
+        }
+
+        .platform-linkedin {
+            background: #0077b5;
+        }
+
+        .platform-substack {
+            background: #ff6719;
+        }
+
+        .platform-stories {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+        }
+
+        .platform-email {
+            background: #34495e;
+        }
+
+        .mockup-preview {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .mockup-notes {
+            background: #fff9e6;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .mockup-notes h4 {
+            color: #856404;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .mockup-notes ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .mockup-notes li {
+            color: #5a6c7d;
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        /* Instagram Post Styles */
+        .instagram-post {
+            max-width: 500px;
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        .ig-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .ig-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .ig-user-info {
+            flex: 1;
+        }
+
+        .ig-username {
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #262626;
+        }
+
+        .ig-location {
+            font-size: 0.75em;
+            color: #8e8e8e;
+        }
+
+        .ig-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .ig-high-bias {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .ig-headline {
+            color: white;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .ig-bias-tags {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .ig-tag {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .ig-bias-load {
+            font-size: 4em;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .ig-bias-label {
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .ig-outlet {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em;
+        }
+
+        .ig-caption {
+            padding: 8px 16px 16px;
+            font-size: 0.9em;
+            color: #262626;
+            line-height: 1.5;
+        }
+
+        .ig-more {
+            color: #8e8e8e;
+        }
+
+        .ig-hashtags {
+            color: #00376b;
+            margin-top: 8px;
+        }
+
+        /* Twitter/X Styles */
+        .twitter-post {
+            max-width: 580px;
+            background: white;
+            border: 1px solid #eff3f4;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 0 auto;
+        }
+
+        .tweet-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tweet-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .tweet-info {
+            flex: 1;
+        }
+
+        .tweet-name {
+            font-weight: 700;
+            font-size: 0.95em;
+            color: #0f1419;
+        }
+
+        .tweet-handle {
+            color: #536471;
+            font-size: 0.9em;
+        }
+
+        .tweet-content {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #0f1419;
+            margin-bottom: 16px;
+        }
+
+        .tweet-card {
+            border: 1px solid #cfd9de;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .tweet-card-image {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .tweet-high-bias {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .tweet-stat {
+            font-size: 4em;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+        }
+
+        .tweet-label {
+            color: white;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        .tweet-card-content {
+            padding: 16px;
+            background: white;
+        }
+
+        .tweet-card-title {
+            font-weight: 600;
+            color: #0f1419;
+            margin-bottom: 4px;
+        }
+
+        .tweet-card-description {
+            font-size: 0.85em;
+            color: #536471;
+        }
+
+        /* LinkedIn Styles */
+        .linkedin-post {
+            max-width: 552px;
+            background: white;
+            border: 1px solid #d3d3d3;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        .li-header {
+            display: flex;
+            gap: 12px;
+            padding: 16px 16px 0;
+        }
+
+        .li-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #0077b5;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .li-info {
+            flex: 1;
+        }
+
+        .li-name {
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #000000;
+        }
+
+        .li-tagline {
+            font-size: 0.75em;
+            color: #666666;
+        }
+
+        .li-time {
+            font-size: 0.75em;
+            color: #666666;
+            margin-top: 4px;
+        }
+
+        .li-content {
+            padding: 12px 16px;
+            font-size: 0.9em;
+            line-height: 1.6;
+            color: #000000;
+        }
+
+        .li-see-more {
+            color: #0077b5;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .li-image {
+            width: 100%;
+        }
+
+        .li-professional {
+            background: #f3f6f8;
+            padding: 30px;
+        }
+
+        .li-viz {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #d3d3d3;
+        }
+
+        .li-stat-header {
+            font-size: 0.8em;
+            color: #666666;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .li-main-stat {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #0077b5;
+            margin-bottom: 20px;
+        }
+
+        .li-breakdown {
+            margin-bottom: 15px;
+        }
+
+        .li-bar {
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .li-bar-fill {
+            height: 24px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .li-bar span {
+            font-size: 0.85em;
+            color: #666666;
+        }
+
+        .li-source {
+            font-size: 0.75em;
+            color: #666666;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Substack Newsletter Styles */
+        .substack-post {
+            max-width: 680px;
+            background: white;
+            padding: 40px;
+            margin: 0 auto;
+            font-family: Georgia, serif;
+        }
+
+        .substack-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 30px;
+        }
+
+        .substack-logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ff6719;
+        }
+
+        .substack-subtitle {
+            font-size: 0.9em;
+            color: #666666;
+            margin-top: 5px;
+        }
+
+        .substack-title {
+            font-size: 2em;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .substack-byline {
+            font-size: 1.1em;
+            color: #666666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .substack-meta {
+            font-size: 0.85em;
+            color: #999999;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .substack-image {
+            margin-bottom: 30px;
+        }
+
+        .substack-img-placeholder {
+            background: #f3f6f8;
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: 4px;
+            color: #666666;
+            font-size: 1.2em;
+        }
+
+        .substack-content {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: #333333;
+        }
+
+        .substack-content p {
+            margin: 20px 0;
+        }
+
+        .substack-content h3 {
+            font-size: 1.5em;
+            margin: 30px 0 15px;
+            color: #000000;
+        }
+
+        .substack-content ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        .substack-content li {
+            margin: 10px 0;
+        }
+
+        .highlight-red {
+            background: #ffe6e6;
+            padding: 2px 4px;
+            color: #c0392b;
+            font-weight: 600;
+        }
+
+        .callout {
+            display: inline-block;
+            background: #e8f4fd;
+            padding: 8px 12px;
+            border-left: 3px solid #3498db;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        /* Instagram Stories Styles */
+        .ig-stories-container {
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .ig-story {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 9/16;
+            position: relative;
+        }
+
+        .ig-story-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .ig-story-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: white;
+            color: #833ab4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .ig-story-username {
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .ig-story-time {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85em;
+            margin-left: auto;
+        }
+
+        .ig-story-content {
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .ig-story-content h2 {
+            font-size: 1.8em;
+            margin-bottom: 40px;
+            line-height: 1.2;
+        }
+
+        .ig-story-article-preview {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .ig-story-outlet {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .ig-story-cta {
+            font-size: 1em;
+            font-weight: 600;
+            background: white;
+            color: #833ab4;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .ig-story-indicator {
+            text-align: center;
+            padding: 15px;
+            color: #8e8e8e;
+            font-size: 0.85em;
+        }
+
+        /* Email Newsletter Styles */
+        .email-newsletter {
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            margin: 0 auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .email-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 25px;
+        }
+
+        .email-header h2 {
+            color: #1e3a5f;
+            font-size: 1.8em;
+            margin: 0 0 10px 0;
+        }
+
+        .email-date {
+            color: #666666;
+            font-size: 0.9em;
+        }
+
+        .email-intro {
+            margin-bottom: 20px;
+        }
+
+        .email-intro p {
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .email-table {
+            margin: 20px 0;
+        }
+
+        .email-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .email-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e3a5f;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .email-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .high-bias-row {
+            background: #ffe6e6;
+        }
+
+        .medium-bias-row {
+            background: #fff9e6;
+        }
+
+        .low-bias-row {
+            background: #e8f8f5;
+        }
+
+        .email-spotlight {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid #3498db;
+        }
+
+        .email-spotlight h3 {
+            color: #1e3a5f;
+            margin: 0 0 15px 0;
+        }
+
+        .email-spotlight-content {
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .email-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .email-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Twitter Infographic Styles */
+        .tweet-infographic {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 16px;
+        }
+
+        .infographic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .infographic-outlet {
+            font-weight: 700;
+            font-size: 1.2em;
+            color: #0f1419;
+        }
+
+        .infographic-date {
+            color: #536471;
+            font-size: 0.9em;
+        }
+
+        .infographic-main {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .infographic-big-stat {
+            font-size: 5em;
+            font-weight: 900;
+            color: #e74c3c;
+            line-height: 1;
+        }
+
+        .infographic-label {
+            font-size: 0.9em;
+            color: #536471;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        .infographic-breakdown {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .infographic-item {
+            text-align: center;
+        }
+
+        .infographic-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .infographic-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #0f1419;
+        }
+
+        .infographic-name {
+            font-size: 0.85em;
+            color: #536471;
+            margin-top: 5px;
+        }
+
+        .infographic-footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+            color: #536471;
+            font-size: 0.85em;
+        }
+
+        /* LinkedIn Carousel Styles */
+        .linkedin-carousel {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .carousel-slide {
+            background: linear-gradient(135deg, #0077b5, #005885);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .carousel-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .carousel-slide h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .carousel-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .carousel-footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .carousel-indicator {
+            text-align: center;
+            padding: 15px;
+            color: #666666;
+            font-size: 0.9em;
+        }
+
+        /* Mockups Footer */
+        .mockups-footer {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .mockups-footer h3 {
+            color: #1e3a5f;
+            margin-bottom: 15px;
+        }
+
+        .mockups-footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mockups-footer li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            color: #5a6c7d;
+            line-height: 1.6;
+        }
+
+        .mockups-footer li::before {
+            content: '💭';
+            position: absolute;
+            left: 0;
+        }
     </style>
 </head>
 <body>
@@ -1429,6 +2352,7 @@
             <button class="tab-btn" onclick="showView('articleQueue')">Article Queue</button>
             <button class="tab-btn" onclick="showView('annotatorQueue')">Annotator Queue</button>
             <button class="tab-btn" onclick="showView('analytics')">Claude Analytics</button>
+            <button class="tab-btn" onclick="showView('mockups')">Content Mockups</button>
         </div>
 
         <!-- SYSTEM OVERVIEW -->
@@ -3535,6 +4459,445 @@
                 </div>
             </div>
         </div>
+
+        <!-- CONTENT MOCKUPS -->
+        <div id="mockups" class="dashboard-view">
+            <div class="section-header">Content Publication Mockups</div>
+
+            <!-- Page Header -->
+            <div class="mockups-intro">
+                <p style="font-size: 1.1em; color: #5a6c7d; margin-bottom: 20px;">These mockups show how our bias analysis output could be published across different platforms. Each represents a different approach to presenting the same analysis to different audiences. Click any mockup to see details.</p>
+                <div class="sample-data-note">
+                    <strong>Sample Analysis Used:</strong> CNN article "Trump Admits Defeat in Latest Court Ruling" | 45% Bias Load | 14/32 sentences flagged | Loaded Language (62%) + Framing (23%)
+                </div>
+            </div>
+
+            <!-- Mockups Grid -->
+            <div class="mockups-grid">
+
+                <!-- Mockup 1: Instagram Gradient Alert -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Instagram: Gradient Alert Card</h3>
+                        <span class="platform-badge platform-instagram">📸 Instagram</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="instagram-post">
+                            <div class="ig-header">
+                                <div class="ig-avatar">BR</div>
+                                <div class="ig-user-info">
+                                    <div class="ig-username">biasradar</div>
+                                    <div class="ig-location">Pre-Narrative Journalism</div>
+                                </div>
+                            </div>
+                            <div class="ig-image ig-high-bias">
+                                <div class="ig-headline">Trump Admits Defeat in Latest Court Ruling</div>
+                                <div class="ig-bias-tags">
+                                    <span class="ig-tag">Loaded Language</span>
+                                    <span class="ig-tag">Framing</span>
+                                </div>
+                                <div class="ig-bias-load">45%</div>
+                                <div class="ig-bias-label">BIAS LOAD</div>
+                                <div class="ig-outlet">CNN • Jan 15, 2024</div>
+                            </div>
+                            <div class="ig-caption">
+                                <strong>biasradar</strong> CNN's court coverage shows 45% bias load—14 of 32 sentences flagged. Dominant issue: loaded language. Words like "admits defeat" and "embattled" shape perception before presenting facts. <span class="ig-more">...more</span>
+                                <div class="ig-hashtags">#BiasRadar #MediaLiteracy #LoadedLanguage</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Red gradient = high bias (45%)</li>
+                            <li>Bold percentage display for scroll-stopping impact</li>
+                            <li>Bias types as floating badges</li>
+                            <li>Caption focuses on key finding: loaded language</li>
+                            <li>Hashtags for discoverability</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 2: Twitter/X Thread Starter -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Twitter/X: Thread Breakdown</h3>
+                        <span class="platform-badge platform-twitter">𝕏 Twitter</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="twitter-post">
+                            <div class="tweet-header">
+                                <div class="tweet-avatar">BR</div>
+                                <div class="tweet-info">
+                                    <div class="tweet-name">Bias Radar</div>
+                                    <div class="tweet-handle">@biasradar · 2h</div>
+                                </div>
+                            </div>
+                            <div class="tweet-content">
+                                We analyzed CNN's coverage: "Trump Admits Defeat in Latest Court Ruling"<br><br>
+                                Found: 45% bias load (14 of 32 sentences flagged)<br>
+                                Primary drivers: Loaded language + Framing<br><br>
+                                Here's what that looks like 🧵 [1/6]
+                            </div>
+                            <div class="tweet-card">
+                                <div class="tweet-card-image tweet-high-bias">
+                                    <div class="tweet-stat">45%</div>
+                                    <div class="tweet-label">BIAS LOAD</div>
+                                </div>
+                                <div class="tweet-card-content">
+                                    <div class="tweet-card-title">CNN • Jan 15, 2024</div>
+                                    <div class="tweet-card-description">Loaded Language: 62% | Framing: 23% | Other: 15%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Thread format (🧵) signals more content coming</li>
+                            <li>Lead with the data: 45% bias load</li>
+                            <li>Twitter card shows visual breakdown</li>
+                            <li>Short, punchy copy optimized for retweets</li>
+                            <li>Follow-up tweets would show specific examples</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 3: LinkedIn Professional Analysis -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>LinkedIn: Professional Deep Dive</h3>
+                        <span class="platform-badge platform-linkedin">💼 LinkedIn</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="linkedin-post">
+                            <div class="li-header">
+                                <div class="li-avatar">BR</div>
+                                <div class="li-info">
+                                    <div class="li-name">Bias Radar | FT3 Media</div>
+                                    <div class="li-tagline">Pre-narrative journalism • Media transparency</div>
+                                    <div class="li-time">2h • 🌐</div>
+                                </div>
+                            </div>
+                            <div class="li-content">
+                                <strong>Media literacy update:</strong> We analyzed CNN's coverage of the latest Trump court ruling using sentence-level bias detection.<br><br>
+
+                                Key finding: 45% bias load driven primarily by loaded language (62%) and framing choices (23%).<br><br>
+
+                                The headline alone—"Trump Admits Defeat"—contains two loaded terms: "admits" (implies reluctance/wrongdoing) and "defeat" (emotional framing vs. neutral "ruling went against").<br><br>
+
+                                <span class="li-see-more">...see more</span>
+                            </div>
+                            <div class="li-image li-professional">
+                                <div class="li-viz">
+                                    <div class="li-stat-header">BIAS ANALYSIS</div>
+                                    <div class="li-main-stat">45% Bias Load</div>
+                                    <div class="li-breakdown">
+                                        <div class="li-bar">
+                                            <div class="li-bar-fill" style="width: 62%; background: #e74c3c;"></div>
+                                            <span>Loaded Language: 62%</span>
+                                        </div>
+                                        <div class="li-bar">
+                                            <div class="li-bar-fill" style="width: 23%; background: #f39c12;"></div>
+                                            <span>Framing: 23%</span>
+                                        </div>
+                                        <div class="li-bar">
+                                            <div class="li-bar-fill" style="width: 15%; background: #3498db;"></div>
+                                            <span>Other: 15%</span>
+                                        </div>
+                                    </div>
+                                    <div class="li-source">CNN • Jan 15, 2024 • 32 sentences analyzed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Professional tone: "Media literacy update"</li>
+                            <li>Educational approach with specific examples</li>
+                            <li>Data visualization (horizontal bars) for credibility</li>
+                            <li>Longer copy appropriate for LinkedIn audience</li>
+                            <li>Positions FT3 as thought leader</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 4: Substack Newsletter -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Substack: Long-Form Explainer</h3>
+                        <span class="platform-badge platform-substack">📧 Substack</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="substack-post">
+                            <div class="substack-header">
+                                <div class="substack-logo">BIAS RADAR</div>
+                                <div class="substack-subtitle">Pre-narrative journalism from FT3 Media</div>
+                            </div>
+                            <div class="substack-title">How CNN's Court Coverage Uses Loaded Language to Shape Perception</div>
+                            <div class="substack-byline">
+                                A sentence-by-sentence analysis of bias in political reporting
+                            </div>
+                            <div class="substack-meta">
+                                <span>Jan 15, 2024</span>
+                                <span>•</span>
+                                <span>6 min read</span>
+                            </div>
+                            <div class="substack-image">
+                                <div class="substack-img-placeholder">
+                                    📰 Article Screenshot with Highlights
+                                </div>
+                            </div>
+                            <div class="substack-content">
+                                <p><strong>We analyzed CNN's coverage</strong> of a recent court ruling involving Trump and found a clear pattern: 45% of sentences contained detectable bias, with loaded language driving 62% of those instances.</p>
+
+                                <p>Let's break down what that actually means...</p>
+
+                                <h3>The Headline Problem</h3>
+                                <p>"Trump <span class="highlight-red">Admits Defeat</span> in Latest Court Ruling"</p>
+
+                                <p>Two loaded terms right at the top:</p>
+                                <ul>
+                                    <li><strong>"Admits"</strong> - implies reluctance, wrongdoing, or forced acknowledgment</li>
+                                    <li><strong>"Defeat"</strong> - emotional framing vs. neutral alternatives</li>
+                                </ul>
+
+                                <p><span class="callout">→ Neutral alternative: "Trump Loses Court Appeal" or "Court Rules Against Trump"</span></p>
+
+                                <p><em>[Article continues with 3 more detailed examples...]</em></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Newsletter format with classic typography</li>
+                            <li>In-depth educational content (6 min read)</li>
+                            <li>Specific examples with alternatives shown</li>
+                            <li>Visual callouts for key insights</li>
+                            <li>Teaches readers to spot bias themselves</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 5: Instagram Stories -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Instagram Stories: Swipeable Tutorial</h3>
+                        <span class="platform-badge platform-stories">📱 Stories</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="ig-stories-container">
+                            <div class="ig-story">
+                                <div class="ig-story-header">
+                                    <div class="ig-story-avatar">BR</div>
+                                    <div class="ig-story-username">biasradar</div>
+                                    <div class="ig-story-time">2h</div>
+                                </div>
+                                <div class="ig-story-content ig-story-1">
+                                    <h2>Let's detect bias together 👇</h2>
+                                    <div class="ig-story-article-preview">
+                                        "Trump Admits Defeat in Latest Court Ruling"<br>
+                                        <span class="ig-story-outlet">CNN • Jan 15</span>
+                                    </div>
+                                    <div class="ig-story-cta">Swipe to see what we found →</div>
+                                </div>
+                            </div>
+                            <div class="ig-story-indicator">
+                                <span>Story 1 of 6</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Story Sequence:</h4>
+                        <ul>
+                            <li><strong>Slide 1:</strong> Article intro + "Let's detect bias"</li>
+                            <li><strong>Slide 2:</strong> Zoom on headline with circles around "admits" and "defeat"</li>
+                            <li><strong>Slide 3:</strong> "Why is 'admits' loaded?" + explanation</li>
+                            <li><strong>Slide 4:</strong> "Why is 'defeat' loaded?" + explanation</li>
+                            <li><strong>Slide 5:</strong> "45% Bias Load" with animated bar</li>
+                            <li><strong>Slide 6:</strong> "Learn more at biasradar.com" + swipe up link</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 6: Email Newsletter Roundup -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Email: Weekly Roundup</h3>
+                        <span class="platform-badge platform-email">📬 Newsletter</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="email-newsletter">
+                            <div class="email-header">
+                                <h2>🔍 Bias Radar Weekly</h2>
+                                <div class="email-date">January 15-22, 2024</div>
+                            </div>
+                            <div class="email-intro">
+                                <p>This week we analyzed <strong>47 articles</strong> across 8 outlets covering the Trump court ruling. Here's what the data shows:</p>
+                            </div>
+                            <div class="email-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Outlet</th>
+                                            <th>Bias Load</th>
+                                            <th>Dominant Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="high-bias-row">
+                                            <td><strong>CNN</strong></td>
+                                            <td>45%</td>
+                                            <td>Loaded Language</td>
+                                        </tr>
+                                        <tr class="medium-bias-row">
+                                            <td>Fox News</td>
+                                            <td>38%</td>
+                                            <td>Framing</td>
+                                        </tr>
+                                        <tr class="low-bias-row">
+                                            <td>Reuters</td>
+                                            <td>8%</td>
+                                            <td>Source Imbalance</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="email-spotlight">
+                                <h3>📌 Article of the Week</h3>
+                                <div class="email-spotlight-content">
+                                    <strong>CNN: "Trump Admits Defeat in Latest Court Ruling"</strong><br>
+                                    Bias Load: 45% | 14 of 32 sentences flagged<br><br>
+                                    <strong>Key Finding:</strong> The headline alone contains two loaded terms: "admits" (implies reluctance) and "defeat" (emotional vs. factual).<br><br>
+                                    <a href="#" class="email-link">Read full analysis →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Weekly digest format comparing multiple outlets</li>
+                            <li>Data table shows relative bias across sources</li>
+                            <li>Color-coded rows (red/yellow/green) for quick scanning</li>
+                            <li>"Article of the Week" spotlight section</li>
+                            <li>Encourages return visits with consistent schedule</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 7: Twitter Visual Infographic -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>Twitter: Quick Visual Stats</h3>
+                        <span class="platform-badge platform-twitter">📊 Infographic</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="twitter-post">
+                            <div class="tweet-header">
+                                <div class="tweet-avatar">BR</div>
+                                <div class="tweet-info">
+                                    <div class="tweet-name">Bias Radar</div>
+                                    <div class="tweet-handle">@biasradar · 3h</div>
+                                </div>
+                            </div>
+                            <div class="tweet-content">
+                                CNN's court coverage: 45% bias load<br>
+                                Primary drivers: Loaded language (62%) + Framing (23%)<br><br>
+                                Visual breakdown 👇
+                            </div>
+                            <div class="tweet-infographic">
+                                <div class="infographic-header">
+                                    <div class="infographic-outlet">CNN</div>
+                                    <div class="infographic-date">Jan 15, 2024</div>
+                                </div>
+                                <div class="infographic-main">
+                                    <div class="infographic-big-stat">45%</div>
+                                    <div class="infographic-label">BIAS LOAD</div>
+                                </div>
+                                <div class="infographic-breakdown">
+                                    <div class="infographic-item">
+                                        <div class="infographic-icon">🗣️</div>
+                                        <div class="infographic-value">62%</div>
+                                        <div class="infographic-name">Loaded Language</div>
+                                    </div>
+                                    <div class="infographic-item">
+                                        <div class="infographic-icon">🖼️</div>
+                                        <div class="infographic-value">23%</div>
+                                        <div class="infographic-name">Framing</div>
+                                    </div>
+                                    <div class="infographic-item">
+                                        <div class="infographic-icon">⚖️</div>
+                                        <div class="infographic-value">15%</div>
+                                        <div class="infographic-name">Other</div>
+                                    </div>
+                                </div>
+                                <div class="infographic-footer">
+                                    14 of 32 sentences flagged • biasradar.com
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Design Notes:</h4>
+                        <ul>
+                            <li>Single-image infographic (no thread needed)</li>
+                            <li>Big number (45%) as focal point</li>
+                            <li>Icons make bias types instantly recognizable</li>
+                            <li>Clean, shareable design optimized for retweets</li>
+                            <li>All key data visible without clicking</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mockup 8: LinkedIn Carousel -->
+                <div class="mockup-card">
+                    <div class="mockup-header">
+                        <h3>LinkedIn: Educational Carousel</h3>
+                        <span class="platform-badge platform-linkedin">📑 Carousel</span>
+                    </div>
+                    <div class="mockup-preview">
+                        <div class="linkedin-carousel">
+                            <div class="carousel-slide carousel-slide-1">
+                                <div class="carousel-number">1</div>
+                                <h2>How to Read Media Bias</h2>
+                                <p class="carousel-subtitle">A Case Study in Loaded Language</p>
+                                <div class="carousel-footer">FT3 Media • Bias Radar</div>
+                            </div>
+                            <div class="carousel-indicator">
+                                <span>Slide 1 of 6 →</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mockup-notes">
+                        <h4>Carousel Sequence:</h4>
+                        <ul>
+                            <li><strong>Slide 1:</strong> Title card "How to Read Media Bias"</li>
+                            <li><strong>Slide 2:</strong> "The Article: CNN • 45% Bias Load"</li>
+                            <li><strong>Slide 3:</strong> "Loaded Language: What is it?" + definition</li>
+                            <li><strong>Slide 4:</strong> Example 1: "admits" highlighted + explanation</li>
+                            <li><strong>Slide 5:</strong> Example 2: "defeat" highlighted + neutral alternative</li>
+                            <li><strong>Slide 6:</strong> "Your turn: Spot the bias" + CTA</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div><!-- end mockups-grid -->
+
+            <!-- Bottom Discussion -->
+            <div class="mockups-footer">
+                <h3>Discussion Points:</h3>
+                <ul>
+                    <li>Which format best serves our target audience (news consumers, educators, journalists)?</li>
+                    <li>Should we focus on one platform or publish across multiple?</li>
+                    <li>How can we balance engagement (Instagram/Twitter) vs. depth (Substack/LinkedIn)?</li>
+                    <li>What's the right posting frequency for each platform?</li>
+                </ul>
+            </div>
+
+        </div><!-- end mockups view -->
     </div>
 
     <script>
