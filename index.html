@@ -1255,6 +1255,162 @@
             font-family: monospace;
             font-size: 13px;
         }
+
+        /* Claude Integration Styles */
+        .claude-suggestion-panel {
+            background: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .claude-suggestion-panel h4 {
+            color: #1e3a5f;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .bias-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .bias-tags .tag {
+            background: #3498db;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .claude-suggestion-panel .reasoning {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .claude-suggestion-panel .suggestions {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .claude-suggestion-panel .phrase {
+            background: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+            margin: 0 4px;
+        }
+
+        .annotator-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .annotator-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #229954;
+        }
+
+        .btn-modify {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-modify:hover {
+            background: #d68910;
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c0392b;
+        }
+
+        .priority-high-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #e74c3c;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-stat {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+
+        .summary-stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -1272,6 +1428,7 @@
             <button class="tab-btn" onclick="showView('production')">Content Production</button>
             <button class="tab-btn" onclick="showView('articleQueue')">Article Queue</button>
             <button class="tab-btn" onclick="showView('annotatorQueue')">Annotator Queue</button>
+            <button class="tab-btn" onclick="showView('analytics')">Claude Analytics</button>
         </div>
 
         <!-- SYSTEM OVERVIEW -->
@@ -3283,6 +3440,101 @@
                 </div>
             </div>
         </div>
+
+        <!-- CLAUDE ANALYTICS -->
+        <div id="analytics" class="dashboard-view">
+            <div class="section-header">Claude API Performance Metrics</div>
+
+            <!-- Demo/Test Section -->
+            <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                <h4 style="color: #856404; margin-bottom: 10px;">🧪 Demo Mode</h4>
+                <p style="color: #856404; margin-bottom: 15px;">Use these buttons to populate test data and see how the Claude integration works:</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="addDemoArticle()" style="padding: 10px 20px; background: #ffc107; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Add Demo Article</button>
+                    <button onclick="generateDemoAnalysis()" style="padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Generate Demo Analysis</button>
+                    <button onclick="clearDemoData()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Clear Demo Data</button>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="metrics-grid" style="margin-bottom: 30px;">
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-value" id="totalAnalyzed">0</div>
+                    <div class="metric-label">Articles Analyzed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">✅</div>
+                    <div class="metric-value" id="autoApproved">0</div>
+                    <div class="metric-label">Auto-Approved</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">👁</div>
+                    <div class="metric-value" id="needsReview">0</div>
+                    <div class="metric-label">Needs Review</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">🎯</div>
+                    <div class="metric-value" id="avgConfidence">0%</div>
+                    <div class="metric-label">Avg Confidence</div>
+                </div>
+            </div>
+
+            <!-- Agreement Metrics -->
+            <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h3 style="margin-bottom: 20px; color: #1e3a5f;">Annotator Agreement with Claude</h3>
+                <div class="metrics-grid">
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="acceptRate">0%</div>
+                        <div class="summary-stat-label">Accepted Tags</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="modifyRate">0%</div>
+                        <div class="summary-stat-label">Modified Tags</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="rejectRate">0%</div>
+                        <div class="summary-stat-label">Rejected Tags</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="agreementRate">0%</div>
+                        <div class="summary-stat-label">Overall Agreement</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Tracking -->
+            <div style="background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h3 style="margin-bottom: 20px; color: #1e3a5f;">Cost Tracking</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="color: #6c757d; margin-bottom: 5px;">Articles Processed</div>
+                        <div style="font-size: 1.5em; font-weight: 700; color: #1e3a5f;" id="costArticles">0</div>
+                    </div>
+                    <div>
+                        <div style="color: #6c757d; margin-bottom: 5px;">Estimated Tokens</div>
+                        <div style="font-size: 1.5em; font-weight: 700; color: #1e3a5f;" id="costTokens">0</div>
+                    </div>
+                    <div>
+                        <div style="color: #6c757d; margin-bottom: 5px;">Estimated Cost</div>
+                        <div style="font-size: 1.5em; font-weight: 700; color: #1e3a5f;" id="costAmount">$0.00</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                    <small style="color: #6c757d;">
+                        <strong>Note:</strong> Cost estimates are approximate and based on Claude Sonnet pricing (~$3 per million input tokens, ~$15 per million output tokens). Actual costs may vary.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Bias Type Breakdown -->
+            <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h3 style="margin-bottom: 20px; color: #1e3a5f;">Agreement by Bias Type</h3>
+                <div id="biasTypeBreakdown">
+                    <p style="color: #6c757d; text-align: center; padding: 40px;">No data available yet. Start analyzing articles with Claude to see metrics.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -3465,6 +3717,10 @@
                         </td>
                         <td style="padding: 12px;">
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${article.status !== 'completed' ?
+                                    `<button onclick="analyzeWithClaude('${article.id}')" style="padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">🤖 Analyze with Claude</button>` :
+                                    ''
+                                }
                                 ${article.status === 'assigned' && article.assignedAnnotators && article.assignedAnnotators.length >= 2 ?
                                     `<button onclick="startAnnotation('${article.id}')" style="padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">📝 Annotate</button>` :
                                     ''
@@ -5027,8 +5283,401 @@
                     bar.style.height = height;
                 }, 200);
             });
+
+            // Load analytics data
+            loadAnalyticsData();
         });
+
+        // ============ CLAUDE INTEGRATION FUNCTIONS ============
+
+        let currentClaudeAnalysis = null;
+
+        // Analyze article with Claude (mock function - actual API calls handled separately)
+        function analyzeWithClaude(articleId) {
+            const article = articleQueue.find(a => a.id === articleId);
+            if (!article) return;
+
+            // Show progress modal
+            document.getElementById('claudeProgressModal').classList.add('active');
+            document.getElementById('progressStatus').textContent = 'Analyzing sentences...';
+            document.getElementById('progressDetail').textContent = 'This may take a moment...';
+
+            // Simulate Claude analysis with mock data
+            setTimeout(() => {
+                // Generate mock Claude analysis
+                const mockAnalysis = generateMockClaudeAnalysis(article);
+                currentClaudeAnalysis = mockAnalysis;
+
+                // Hide progress modal
+                document.getElementById('claudeProgressModal').classList.remove('active');
+
+                // Display results
+                displayClaudeResults(mockAnalysis);
+            }, 2000);
+        }
+
+        // Generate mock Claude analysis (placeholder for actual API integration)
+        function generateMockClaudeAnalysis(article) {
+            const totalSentences = Math.floor(Math.random() * 20) + 10;
+            const needsReview = Math.floor(totalSentences * 0.3);
+            const autoApproved = totalSentences - needsReview;
+
+            const sentences = [];
+            for (let i = 0; i < totalSentences; i++) {
+                const confidence = Math.random();
+                sentences.push({
+                    sentence_id: i + 1,
+                    text: `Sample sentence ${i + 1} from the article.`,
+                    bias_types: confidence < 0.85 ? ['Loaded Language', 'Framing'] : [],
+                    confidence: confidence,
+                    explanation: 'This is a sample explanation of potential bias.',
+                    suggested_neutral: 'This is a suggested neutral alternative.',
+                    primary_indicators: ['slammed', 'controversial']
+                });
+            }
+
+            return {
+                article_id: article.id,
+                article_title: article.title,
+                sentences: sentences,
+                summary_metrics: {
+                    total_sentences: totalSentences,
+                    needs_human_review: sentences.filter(s => s.confidence < 0.85).map(s => s.sentence_id),
+                    bias_load: sentences.filter(s => s.bias_types.length > 0).length / totalSentences
+                }
+            };
+        }
+
+        // Display Claude analysis results
+        function displayClaudeResults(analysis) {
+            const modal = document.getElementById('claudeResultsModal');
+            const needsReviewCount = analysis.summary_metrics.needs_human_review.length;
+            const autoApprovedCount = analysis.summary_metrics.total_sentences - needsReviewCount;
+
+            document.getElementById('totalSentences').textContent = analysis.summary_metrics.total_sentences;
+            document.getElementById('autoApprovedCount').textContent = autoApprovedCount;
+            document.getElementById('needsReviewCount').textContent = needsReviewCount;
+            document.getElementById('biasLoad').textContent = (analysis.summary_metrics.bias_load * 100).toFixed(1) + '%';
+            document.getElementById('itemsToImport').textContent = needsReviewCount;
+
+            modal.classList.add('active');
+        }
+
+        // Close Claude results modal
+        function closeClaudeResultsModal() {
+            document.getElementById('claudeResultsModal').classList.remove('active');
+        }
+
+        // Import Claude results to review queue
+        function importClaudeResults() {
+            if (!currentClaudeAnalysis) return;
+
+            const reviewItems = currentClaudeAnalysis.sentences
+                .filter(s => currentClaudeAnalysis.summary_metrics.needs_human_review.includes(s.sentence_id))
+                .map(s => ({
+                    queue_item_id: generateUUID(),
+                    article_id: currentClaudeAnalysis.article_id,
+                    article_title: currentClaudeAnalysis.article_title,
+                    sent_id: s.sentence_id,
+                    text: s.text,
+                    context: '',
+                    claude_suggestion: {
+                        bias_types: s.bias_types,
+                        confidence: s.confidence,
+                        reasoning: s.explanation,
+                        suggested_neutral: s.suggested_neutral,
+                        key_phrases: s.primary_indicators
+                    },
+                    status: 'pending',
+                    priority: s.confidence < 0.5 ? 'high' : 'medium',
+                    created_at: new Date().toISOString(),
+                    annotator_response: null
+                }));
+
+            // Save to localStorage
+            const existingQueue = JSON.parse(localStorage.getItem('reviewQueue') || '[]');
+            const updatedQueue = [...existingQueue, ...reviewItems];
+            localStorage.setItem('reviewQueue', JSON.stringify(updatedQueue));
+
+            // Save analytics data
+            saveClaudeAnalysis(currentClaudeAnalysis);
+
+            // Close modal and show success message
+            closeClaudeResultsModal();
+            alert(`Imported ${reviewItems.length} items to review queue!`);
+            currentClaudeAnalysis = null;
+        }
+
+        // Generate UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Get confidence color
+        function getConfidenceColor(confidence) {
+            if (confidence >= 0.85) return '#27ae60';
+            if (confidence >= 0.65) return '#f39c12';
+            return '#e74c3c';
+        }
+
+        // Handle annotator response to Claude suggestion
+        function handleAnnotatorResponse(itemId, responseType) {
+            const queue = JSON.parse(localStorage.getItem('reviewQueue') || '[]');
+            const item = queue.find(i => i.queue_item_id === itemId);
+
+            if (!item) return;
+
+            item.annotator_response = {
+                type: responseType,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('reviewQueue', JSON.stringify(queue));
+
+            // Update agreement metrics
+            updateAgreementMetrics(responseType);
+
+            alert(`Response recorded: ${responseType}`);
+        }
+
+        // Save Claude analysis for analytics
+        function saveClaudeAnalysis(analysis) {
+            const existing = JSON.parse(localStorage.getItem('claudeAnalyses') || '[]');
+            existing.push({
+                ...analysis,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('claudeAnalyses', JSON.stringify(existing));
+        }
+
+        // Update agreement metrics
+        function updateAgreementMetrics(responseType) {
+            const metrics = JSON.parse(localStorage.getItem('agreementMetrics') || JSON.stringify({
+                total_responses: 0,
+                accept_count: 0,
+                modify_count: 0,
+                reject_count: 0
+            }));
+
+            metrics.total_responses++;
+            if (responseType === 'accept') metrics.accept_count++;
+            else if (responseType === 'modify') metrics.modify_count++;
+            else if (responseType === 'reject') metrics.reject_count++;
+
+            localStorage.setItem('agreementMetrics', JSON.stringify(metrics));
+            loadAnalyticsData();
+        }
+
+        // Load analytics data
+        function loadAnalyticsData() {
+            const analyses = JSON.parse(localStorage.getItem('claudeAnalyses') || '[]');
+            const metrics = JSON.parse(localStorage.getItem('agreementMetrics') || JSON.stringify({
+                total_responses: 0,
+                accept_count: 0,
+                modify_count: 0,
+                reject_count: 0
+            }));
+
+            // Update performance metrics
+            const totalAnalyzed = analyses.length;
+            const totalAutoApproved = analyses.reduce((sum, a) =>
+                sum + (a.summary_metrics.total_sentences - a.summary_metrics.needs_human_review.length), 0);
+            const totalNeedsReview = analyses.reduce((sum, a) =>
+                sum + a.summary_metrics.needs_human_review.length, 0);
+            const avgConfidence = analyses.length > 0 ?
+                analyses.reduce((sum, a) => sum + a.sentences.reduce((s, sent) => s + sent.confidence, 0) / a.sentences.length, 0) / analyses.length : 0;
+
+            if (document.getElementById('totalAnalyzed')) {
+                document.getElementById('totalAnalyzed').textContent = totalAnalyzed;
+            }
+            if (document.getElementById('autoApproved')) {
+                document.getElementById('autoApproved').textContent = totalAutoApproved;
+            }
+            if (document.getElementById('needsReview')) {
+                document.getElementById('needsReview').textContent = totalNeedsReview;
+            }
+            if (document.getElementById('avgConfidence')) {
+                document.getElementById('avgConfidence').textContent = (avgConfidence * 100).toFixed(0) + '%';
+            }
+
+            // Update agreement metrics
+            const total = metrics.total_responses;
+            if (document.getElementById('acceptRate')) {
+                document.getElementById('acceptRate').textContent = total > 0 ?
+                    ((metrics.accept_count / total) * 100).toFixed(0) + '%' : '0%';
+            }
+            if (document.getElementById('modifyRate')) {
+                document.getElementById('modifyRate').textContent = total > 0 ?
+                    ((metrics.modify_count / total) * 100).toFixed(0) + '%' : '0%';
+            }
+            if (document.getElementById('rejectRate')) {
+                document.getElementById('rejectRate').textContent = total > 0 ?
+                    ((metrics.reject_count / total) * 100).toFixed(0) + '%' : '0%';
+            }
+            if (document.getElementById('agreementRate')) {
+                document.getElementById('agreementRate').textContent = total > 0 ?
+                    ((metrics.accept_count / total) * 100).toFixed(0) + '%' : '0%';
+            }
+
+            // Update cost tracking
+            const totalSentences = analyses.reduce((sum, a) => sum + a.summary_metrics.total_sentences, 0);
+            const estimatedTokens = totalSentences * 150; // Rough estimate
+            const estimatedCost = (estimatedTokens / 1000000) * 3; // $3 per million input tokens
+
+            if (document.getElementById('costArticles')) {
+                document.getElementById('costArticles').textContent = totalAnalyzed;
+            }
+            if (document.getElementById('costTokens')) {
+                document.getElementById('costTokens').textContent = estimatedTokens.toLocaleString();
+            }
+            if (document.getElementById('costAmount')) {
+                document.getElementById('costAmount').textContent = '$' + estimatedCost.toFixed(2);
+            }
+        }
+
+        // ============ DEMO/TEST FUNCTIONS ============
+
+        // Add demo article to queue
+        function addDemoArticle() {
+            const demoArticle = {
+                id: Date.now().toString(),
+                title: "Climate Summit Ends in Controversy as Nations Clash Over Emission Targets",
+                source: "News Daily",
+                url: "https://example.com/demo-article",
+                priority: "high",
+                notes: "Demo article for testing Claude integration",
+                dateAdded: new Date().toISOString(),
+                status: 'pending',
+                assignedAnnotators: []
+            };
+
+            articleQueue.push(demoArticle);
+            saveQueue();
+            renderQueue();
+            alert('Demo article added to queue! Go to Article Queue tab to see it.');
+        }
+
+        // Generate demo Claude analysis
+        function generateDemoAnalysis() {
+            const demoAnalysis = {
+                article_id: 'demo-' + Date.now(),
+                article_title: 'Demo Analysis Article',
+                sentences: [
+                    {
+                        sentence_id: 1,
+                        text: 'The controversial policy was slammed by critics.',
+                        bias_types: ['Loaded Language'],
+                        confidence: 0.72,
+                        explanation: 'The word "slammed" is loaded language that emphasizes conflict.',
+                        suggested_neutral: 'The policy was criticized by opponents.',
+                        primary_indicators: ['slammed']
+                    },
+                    {
+                        sentence_id: 2,
+                        text: 'Experts agree the situation is dire.',
+                        bias_types: ['Framing'],
+                        confidence: 0.68,
+                        explanation: 'Framing assumes consensus without attribution.',
+                        suggested_neutral: 'Some experts describe the situation as serious.',
+                        primary_indicators: ['dire']
+                    },
+                    {
+                        sentence_id: 3,
+                        text: 'The report was published yesterday.',
+                        bias_types: [],
+                        confidence: 0.95,
+                        explanation: 'Neutral factual statement.',
+                        suggested_neutral: 'The report was published yesterday.',
+                        primary_indicators: []
+                    }
+                ],
+                summary_metrics: {
+                    total_sentences: 3,
+                    needs_human_review: [1, 2],
+                    bias_load: 0.67
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            // Save analysis
+            saveClaudeAnalysis(demoAnalysis);
+
+            // Add some demo agreement responses
+            updateAgreementMetrics('accept');
+            updateAgreementMetrics('accept');
+            updateAgreementMetrics('modify');
+            updateAgreementMetrics('reject');
+
+            alert('Demo analysis data generated! Metrics should now be visible.');
+        }
+
+        // Clear demo data
+        function clearDemoData() {
+            if (confirm('Clear all Claude analysis and agreement data?')) {
+                localStorage.removeItem('claudeAnalyses');
+                localStorage.removeItem('agreementMetrics');
+                localStorage.removeItem('reviewQueue');
+                loadAnalyticsData();
+                alert('Demo data cleared!');
+            }
+        }
     </script>
+
+    <!-- Claude Progress Modal -->
+    <div id="claudeProgressModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🤖 Analyzing with Claude</h2>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 40px 20px;">
+                <div class="loading-spinner" style="width: 50px; height: 50px; border-width: 5px; margin: 0 auto 30px;"></div>
+                <h3 id="progressStatus" style="color: #1e3a5f; margin-bottom: 10px;">Analyzing sentences...</h3>
+                <p id="progressDetail" style="color: #6c757d;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claude Results Modal -->
+    <div id="claudeResultsModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>📊 Claude Analysis Complete</h2>
+                <button type="button" class="modal-close" onclick="closeClaudeResultsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-summary-grid">
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="totalSentences">0</div>
+                        <div class="summary-stat-label">Total Sentences</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="autoApprovedCount">0</div>
+                        <div class="summary-stat-label">Auto-Approved</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="needsReviewCount">0</div>
+                        <div class="summary-stat-label">Needs Review</div>
+                    </div>
+                    <div class="summary-stat">
+                        <div class="summary-stat-value" id="biasLoad">0%</div>
+                        <div class="summary-stat-label">Bias Load</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 6px;">
+                    <strong style="color: #1e3a5f;">Ready for Review:</strong>
+                    <p style="margin: 10px 0; color: #5a6c7d;"><span id="itemsToImport">0</span> sentences with confidence below 0.85 will be added to the review queue.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeClaudeResultsModal()">Close</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="importClaudeResults()">Import to Review Queue</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Annotator Management Modal -->
     <div id="annotatorModal" class="modal-overlay">
